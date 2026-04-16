@@ -1,26 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { Star, MoreHorizontal, Code, Sparkles, Terminal, StickyNote, File, Image, Link as LinkIcon } from 'lucide-react';
+import { Star, MoreHorizontal, Code, Sparkles, Terminal, StickyNote, File, Image, Link as LinkIcon, LucideIcon } from 'lucide-react';
 
-// Dominant color per collection for the left border accent
-const COLLECTION_COLORS: Record<string, string> = {
-  coll_1: '#3b82f6', // React Patterns → snippet blue
-  coll_2: '#3b82f6', // Python Snippets → snippet blue
-  coll_3: '#6b7280', // Context Files → file gray
-  coll_4: '#3b82f6', // Interview Prep → snippet blue
-  coll_5: '#f97316', // Git Commands → command orange
-  coll_6: '#8b5cf6', // AI Prompts → prompt purple
-};
-
-// Type icons shown at the bottom of each card
-const COLLECTION_TYPE_ICONS: Record<string, { icon: React.ElementType; color: string }[]> = {
-  coll_1: [{ icon: Code, color: '#3b82f6' }, { icon: StickyNote, color: '#fde047' }, { icon: LinkIcon, color: '#10b981' }],
-  coll_2: [{ icon: Code, color: '#3b82f6' }, { icon: Terminal, color: '#f97316' }],
-  coll_3: [{ icon: File, color: '#6b7280' }, { icon: Image, color: '#ec4899' }],
-  coll_4: [{ icon: Code, color: '#3b82f6' }, { icon: StickyNote, color: '#fde047' }, { icon: Terminal, color: '#f97316' }],
-  coll_5: [{ icon: Terminal, color: '#f97316' }, { icon: LinkIcon, color: '#10b981' }],
-  coll_6: [{ icon: Sparkles, color: '#8b5cf6' }, { icon: Code, color: '#3b82f6' }],
+const ICON_MAP: Record<string, LucideIcon> = {
+  Code, Sparkles, Terminal, StickyNote, File, Image, Link: LinkIcon,
 };
 
 interface CollectionCardProps {
@@ -30,16 +14,18 @@ interface CollectionCardProps {
     description: string | null;
     isFavorite: boolean;
     itemCount: number;
+    accentColor: string;
+    typeIcons: { icon: string; color: string }[];
   };
 }
 
 export function CollectionCard({ collection }: CollectionCardProps) {
-  const accentColor = COLLECTION_COLORS[collection.id] ?? '#3b82f6';
-  const typeIcons = COLLECTION_TYPE_ICONS[collection.id] ?? [];
+  const { accentColor, typeIcons } = collection;
 
   return (
     <Link href={`/collections/${collection.id}`}>
-      <div className="group relative bg-card border border-border rounded-lg p-4 h-full flex flex-col gap-2 hover:border-border/80 hover:bg-card/80 transition-colors cursor-pointer"
+      <div
+        className="group relative bg-card border border-border rounded-lg p-4 h-full flex flex-col gap-2 hover:border-border/80 hover:bg-card/80 transition-colors cursor-pointer"
         style={{ borderLeftColor: accentColor, borderLeftWidth: '3px' }}
       >
         {/* Header */}
@@ -71,9 +57,10 @@ export function CollectionCard({ collection }: CollectionCardProps) {
         {/* Type icon strip */}
         {typeIcons.length > 0 && (
           <div className="flex items-center gap-1.5 mt-1">
-            {typeIcons.map(({ icon: Icon, color }, i) => (
-              <Icon key={i} className="h-3.5 w-3.5" style={{ color }} />
-            ))}
+            {typeIcons.map(({ icon, color }, i) => {
+              const Icon = ICON_MAP[icon] ?? Code;
+              return <Icon key={i} className="h-3.5 w-3.5" style={{ color }} />;
+            })}
           </div>
         )}
       </div>
