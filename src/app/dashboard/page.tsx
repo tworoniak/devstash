@@ -1,5 +1,15 @@
+import { StatsSection } from '@/components/dashboard/stats-section';
+import { CollectionsSection } from '@/components/dashboard/collections-section';
+import { PinnedSection } from '@/components/dashboard/pinned-section';
+import { RecentSection } from '@/components/dashboard/recent-section';
+
 export default function DashboardPage() {
   return (
-    <h2 className="text-sm font-semibold text-muted-foreground">Main</h2>
+    <div className="max-w-6xl mx-auto">
+      <StatsSection />
+      <CollectionsSection />
+      <PinnedSection />
+      <RecentSection />
+    </div>
   );
 }
