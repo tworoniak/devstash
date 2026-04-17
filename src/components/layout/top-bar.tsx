@@ -6,15 +6,16 @@ import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { useState } from 'react';
 import { MobileSidebarContent } from '@/components/layout/sidebar';
-import type { SidebarData } from '@/components/layout/sidebar';
+import type { SidebarData, SidebarUser } from '@/components/layout/sidebar';
 
 interface TopBarProps {
   sidebarOpen: boolean;
   onSidebarToggle: () => void;
   sidebarData: SidebarData | null;
+  user: SidebarUser | null;
 }
 
-export function TopBar({ sidebarOpen, onSidebarToggle, sidebarData }: TopBarProps) {
+export function TopBar({ sidebarOpen, onSidebarToggle, sidebarData, user }: TopBarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -89,7 +90,7 @@ export function TopBar({ sidebarOpen, onSidebarToggle, sidebarData }: TopBarProp
           className='w-64 pl-0 pr-0 pb-0 pt-10 bg-background border-r border-border'
         >
           <SheetTitle className='sr-only'>Navigation</SheetTitle>
-          <MobileSidebarContent sidebarData={sidebarData} />
+          <MobileSidebarContent sidebarData={sidebarData} user={user} />
         </SheetContent>
       </Sheet>
     </>
