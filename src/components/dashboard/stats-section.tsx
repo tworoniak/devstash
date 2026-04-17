@@ -1,19 +1,38 @@
 import { Box, Layers, Star, FolderOpen } from 'lucide-react';
-import { mockCollections, mockItems, mockItemTypeCounts } from '@/lib/mock-data';
+import { prisma } from '@/lib/prisma';
+import { getDashboardStats } from '@/lib/db/items';
 
-const totalItems = Object.values(mockItemTypeCounts).reduce((a, b) => a + b, 0);
-const totalCollections = mockCollections.length;
-const favoriteItems = mockItems.filter((i) => i.isFavorite).length;
-const favoriteCollections = mockCollections.filter((c) => c.isFavorite).length;
+async function getDemoUserId() {
+  const user = await prisma.user.findUnique({
+    where: { email: 'demo@devstash.io' },
+    select: { id: true },
+  });
+  return user?.id ?? null;
+}
 
-const stats = [
-  { label: 'Total Items', value: totalItems, icon: Box, color: '#3b82f6' },
-  { label: 'Collections', value: totalCollections, icon: Layers, color: '#8b5cf6' },
-  { label: 'Favorite Items', value: favoriteItems, icon: Star, color: '#f97316' },
-  { label: 'Favorite Collections', value: favoriteCollections, icon: FolderOpen, color: '#10b981' },
-];
+export async function StatsSection() {
+  let totalItems = 0;
+  let totalCollections = 0;
+  let favoriteItems = 0;
+  let favoriteCollections = 0;
 
-export function StatsSection() {
+  try {
+    const userId = await getDemoUserId();
+    if (userId) {
+      ({ totalItems, totalCollections, favoriteItems, favoriteCollections } =
+        await getDashboardStats(userId));
+    }
+  } catch (err) {
+    console.error('Failed to load stats:', err);
+  }
+
+  const stats = [
+    { label: 'Total Items', value: totalItems, icon: Box, color: '#3b82f6' },
+    { label: 'Collections', value: totalCollections, icon: Layers, color: '#8b5cf6' },
+    { label: 'Favorite Items', value: favoriteItems, icon: Star, color: '#f97316' },
+    { label: 'Favorite Collections', value: favoriteCollections, icon: FolderOpen, color: '#10b981' },
+  ];
+
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
       {stats.map((stat) => {

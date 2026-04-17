@@ -6,23 +6,24 @@ import {
   Star,
   Folder,
   ChevronDown,
+  ChevronRight,
   Settings,
 } from 'lucide-react';
 import { ICON_MAP } from '@/lib/constants/icon-map';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import {
-  mockUser,
-  mockItemTypes,
-  mockCollections,
-  mockItemTypeCounts,
-} from '@/lib/mock-data';
+import { mockUser } from '@/lib/mock-data';
+import type { SidebarItemType } from '@/lib/db/items';
+import type { SidebarCollection } from '@/lib/db/collections';
+
+export interface SidebarData {
+  itemTypes: SidebarItemType[];
+  favoriteCollections: SidebarCollection[];
+  recentCollections: SidebarCollection[];
+}
 
 const PRO_TYPES = ['file', 'image'];
-
-const favoriteCollections = mockCollections.filter((c) => c.isFavorite);
-const allCollections = mockCollections.filter((c) => !c.isFavorite);
 
 function getInitials(name: string) {
   return name
@@ -57,11 +58,16 @@ function SectionHeader({
 
 interface SidebarContentProps {
   collapsed?: boolean;
+  sidebarData: SidebarData | null;
 }
 
-export function SidebarContent({ collapsed = false }: SidebarContentProps) {
+export function SidebarContent({ collapsed = false, sidebarData }: SidebarContentProps) {
   const [typesOpen, setTypesOpen] = useState(true);
   const [collectionsOpen, setCollectionsOpen] = useState(true);
+
+  const itemTypes = sidebarData?.itemTypes ?? [];
+  const favoriteCollections = sidebarData?.favoriteCollections ?? [];
+  const recentCollections = sidebarData?.recentCollections ?? [];
 
   return (
     <div className='flex flex-col h-full'>
@@ -78,12 +84,8 @@ export function SidebarContent({ collapsed = false }: SidebarContentProps) {
           <nav
             className={`space-y-0.5 mb-4 pb-4 border-b border-border ${collapsed ? 'px-1' : 'px-1.5'}`}
           >
-            {mockItemTypes.map((type) => {
+            {itemTypes.map((type) => {
               const Icon = ICON_MAP[type.icon] ?? Code;
-              const count =
-                mockItemTypeCounts[
-                  type.name as keyof typeof mockItemTypeCounts
-                ] ?? 0;
               const isPro = PRO_TYPES.includes(type.name);
 
               return (
@@ -111,7 +113,7 @@ export function SidebarContent({ collapsed = false }: SidebarContentProps) {
                         </Badge>
                       ) : (
                         <span className='text-xs text-muted-foreground/60'>
-                          {count}
+                          {type.count}
                         </span>
                       )}
                     </>
@@ -133,46 +135,60 @@ export function SidebarContent({ collapsed = false }: SidebarContentProps) {
             {collectionsOpen && (
               <div className='space-y-3 mb-2'>
                 {/* Favorites */}
-                <div>
-                  <p className='px-3 pt-1 pb-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60'>
-                    Favorites
-                  </p>
-                  <nav className='px-1.5 space-y-0.5'>
-                    {favoriteCollections.map((col) => (
-                      <Link
-                        key={col.id}
-                        href={`/collections/${col.id}`}
-                        className='flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors'
-                      >
-                        <Folder className='h-3.5 w-3.5 shrink-0 text-muted-foreground/50' />
-                        <span className='flex-1 truncate'>{col.name}</span>
-                        <Star className='h-3 w-3 shrink-0 fill-amber-400 text-amber-400' />
-                      </Link>
-                    ))}
-                  </nav>
-                </div>
+                {favoriteCollections.length > 0 && (
+                  <div>
+                    <p className='px-3 pt-1 pb-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60'>
+                      Favorites
+                    </p>
+                    <nav className='px-1.5 space-y-0.5'>
+                      {favoriteCollections.map((col) => (
+                        <Link
+                          key={col.id}
+                          href={`/collections/${col.id}`}
+                          className='flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors'
+                        >
+                          <Folder className='h-3.5 w-3.5 shrink-0 text-muted-foreground/50' />
+                          <span className='flex-1 truncate'>{col.name}</span>
+                          <Star className='h-3 w-3 shrink-0 fill-amber-400 text-amber-400' />
+                        </Link>
+                      ))}
+                    </nav>
+                  </div>
+                )}
 
-                {/* All collections */}
-                <div>
-                  <p className='px-3 pb-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60'>
-                    All Collections
-                  </p>
-                  <nav className='px-1.5 space-y-0.5'>
-                    {allCollections.map((col) => (
-                      <Link
-                        key={col.id}
-                        href={`/collections/${col.id}`}
-                        className='flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors'
-                      >
-                        <Folder className='h-3.5 w-3.5 shrink-0 text-muted-foreground/50' />
-                        <span className='flex-1 truncate'>{col.name}</span>
-                        <span className='text-xs text-muted-foreground/60'>
-                          {col.itemCount}
-                        </span>
-                      </Link>
-                    ))}
-                  </nav>
-                </div>
+                {/* Recent collections */}
+                {recentCollections.length > 0 && (
+                  <div>
+                    <p className='px-3 pb-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60'>
+                      Recent
+                    </p>
+                    <nav className='px-1.5 space-y-0.5'>
+                      {recentCollections.map((col) => (
+                        <Link
+                          key={col.id}
+                          href={`/collections/${col.id}`}
+                          className='flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors'
+                        >
+                          <Folder className='h-3.5 w-3.5 shrink-0 text-muted-foreground/50' />
+                          <span className='flex-1 truncate'>{col.name}</span>
+                          <span
+                            className='h-2 w-2 rounded-full shrink-0'
+                            style={{ backgroundColor: col.accentColor }}
+                          />
+                        </Link>
+                      ))}
+                    </nav>
+                  </div>
+                )}
+
+                {/* View all collections */}
+                <Link
+                  href='/collections'
+                  className='flex items-center gap-1.5 px-3 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors'
+                >
+                  <ChevronRight className='h-3 w-3' />
+                  View all collections
+                </Link>
               </div>
             )}
           </>
@@ -210,18 +226,18 @@ export function SidebarContent({ collapsed = false }: SidebarContentProps) {
   );
 }
 
-export function Sidebar({ open }: { open: boolean }) {
+export function Sidebar({ open, sidebarData }: { open: boolean; sidebarData: SidebarData | null }) {
   return (
     <aside
       className={`hidden lg:flex flex-col shrink-0 border-r border-border bg-card transition-all duration-200 ${
         open ? 'w-56' : 'w-14'
       }`}
     >
-      <SidebarContent collapsed={!open} />
+      <SidebarContent collapsed={!open} sidebarData={sidebarData} />
     </aside>
   );
 }
 
-export function MobileSidebarContent() {
-  return <SidebarContent collapsed={false} />;
+export function MobileSidebarContent({ sidebarData }: { sidebarData: SidebarData | null }) {
+  return <SidebarContent collapsed={false} sidebarData={sidebarData} />;
 }
