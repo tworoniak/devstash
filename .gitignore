@@ -51,4 +51,5 @@ AGENTS.md
 /docs
 
 .mcp.json
+/.playwright-mcp
 /src/generated/prisma
