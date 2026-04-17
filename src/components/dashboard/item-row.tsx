@@ -1,13 +1,7 @@
-import {
-  Code, Sparkles, Terminal, StickyNote,
-  File, Image, Link as LinkIcon,
-  Star, Pin, LucideIcon,
-} from 'lucide-react';
+import { Code, Star, Pin } from 'lucide-react';
 import { mockItemTypes } from '@/lib/mock-data';
-
-const ICON_MAP: Record<string, LucideIcon> = {
-  Code, Sparkles, Terminal, StickyNote, File, Image, Link: LinkIcon,
-};
+import { ICON_MAP } from '@/lib/constants/icon-map';
+import { formatDate } from '@/lib/utils';
 
 interface Item {
   id: string;
@@ -20,9 +14,6 @@ interface Item {
   createdAt: Date;
 }
 
-function formatDate(date: Date) {
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
 
 interface ItemRowProps {
   item: Item;

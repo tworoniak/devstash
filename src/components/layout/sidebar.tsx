@@ -3,18 +3,12 @@
 import Link from 'next/link';
 import {
   Code,
-  Sparkles,
-  Terminal,
-  StickyNote,
-  File,
-  Image,
-  Link as LinkIcon,
   Star,
   Folder,
   ChevronDown,
   Settings,
-  LucideIcon,
 } from 'lucide-react';
+import { ICON_MAP } from '@/lib/constants/icon-map';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -24,16 +18,6 @@ import {
   mockCollections,
   mockItemTypeCounts,
 } from '@/lib/mock-data';
-
-const ICON_MAP: Record<string, LucideIcon> = {
-  Code,
-  Sparkles,
-  Terminal,
-  StickyNote,
-  File,
-  Image,
-  Link: LinkIcon,
-};
 
 const PRO_TYPES = ['file', 'image'];
 
