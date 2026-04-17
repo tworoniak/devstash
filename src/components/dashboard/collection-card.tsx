@@ -1,11 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { Star, MoreHorizontal, Code, Sparkles, Terminal, StickyNote, File, Image, Link as LinkIcon, LucideIcon } from 'lucide-react';
-
-const ICON_MAP: Record<string, LucideIcon> = {
-  Code, Sparkles, Terminal, StickyNote, File, Image, Link: LinkIcon,
-};
+import { Star, MoreHorizontal, Code } from 'lucide-react';
+import { ICON_MAP } from '@/lib/constants/icon-map';
 
 interface CollectionCardProps {
   collection: {
@@ -25,7 +22,7 @@ export function CollectionCard({ collection }: CollectionCardProps) {
   return (
     <Link href={`/collections/${collection.id}`}>
       <div
-        className="group relative bg-card border border-border rounded-lg p-4 h-full flex flex-col gap-2 hover:border-border/80 hover:bg-card/80 transition-colors cursor-pointer"
+        className="group relative bg-card border border-border rounded-lg p-4 h-full flex flex-col gap-2 hover:border-border/80 hover:bg-card/80 transition-colors"
         style={{ borderLeftColor: accentColor, borderLeftWidth: '3px' }}
       >
         {/* Header */}
@@ -57,9 +54,9 @@ export function CollectionCard({ collection }: CollectionCardProps) {
         {/* Type icon strip */}
         {typeIcons.length > 0 && (
           <div className="flex items-center gap-1.5 mt-1">
-            {typeIcons.map(({ icon, color }, i) => {
+            {typeIcons.map(({ icon, color }) => {
               const Icon = ICON_MAP[icon] ?? Code;
-              return <Icon key={i} className="h-3.5 w-3.5" style={{ color }} />;
+              return <Icon key={icon} className="h-3.5 w-3.5" style={{ color }} />;
             })}
           </div>
         )}

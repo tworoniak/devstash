@@ -13,8 +13,22 @@ async function getDemoUserId() {
 }
 
 export async function CollectionsSection() {
-  const userId = await getDemoUserId();
-  const collections = userId ? await getDashboardCollections(userId) : [];
+  let collections: Awaited<ReturnType<typeof getDashboardCollections>> = [];
+
+  try {
+    const userId = await getDemoUserId();
+    if (userId) {
+      collections = await getDashboardCollections(userId);
+    }
+  } catch (err) {
+    console.error('Failed to load collections:', err);
+    return (
+      <section className="mb-8">
+        <h2 className="text-sm font-semibold text-foreground mb-3">Collections</h2>
+        <p className="text-sm text-muted-foreground">Failed to load collections.</p>
+      </section>
+    );
+  }
 
   return (
     <section className="mb-8">
