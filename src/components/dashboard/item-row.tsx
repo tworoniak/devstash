@@ -1,28 +1,26 @@
 import { Code, Star, Pin } from 'lucide-react';
-import { mockItemTypes } from '@/lib/mock-data';
 import { ICON_MAP } from '@/lib/constants/icon-map';
 import { formatDate } from '@/lib/utils';
 
-interface Item {
-  id: string;
-  title: string;
-  description: string | null;
-  itemTypeId: string;
-  isFavorite: boolean;
-  isPinned: boolean;
-  tags: string[];
-  createdAt: Date;
-}
-
-
 interface ItemRowProps {
-  item: Item;
+  item: {
+    id: string;
+    title: string;
+    description: string | null;
+    isFavorite: boolean;
+    isPinned: boolean;
+    createdAt: Date;
+    tags: { name: string }[];
+    itemType: {
+      icon: string;
+      color: string;
+    };
+  };
 }
 
 export function ItemRow({ item }: ItemRowProps) {
-  const type = mockItemTypes.find((t) => t.id === item.itemTypeId);
-  const Icon = type ? (ICON_MAP[type.icon] ?? Code) : Code;
-  const color = type?.color ?? '#3b82f6';
+  const Icon = ICON_MAP[item.itemType.icon] ?? Code;
+  const color = item.itemType.color;
 
   return (
     <div
@@ -55,10 +53,10 @@ export function ItemRow({ item }: ItemRowProps) {
           <div className="flex items-center gap-1 mt-1.5 flex-wrap">
             {item.tags.map((tag) => (
               <span
-                key={tag}
+                key={tag.name}
                 className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] bg-muted text-muted-foreground"
               >
-                {tag}
+                {tag.name}
               </span>
             ))}
           </div>
