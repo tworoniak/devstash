@@ -7,13 +7,21 @@ import {
   Folder,
   ChevronDown,
   ChevronRight,
-  Settings,
+  LogOut,
+  User,
 } from 'lucide-react';
 import { ICON_MAP } from '@/lib/constants/icon-map';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { mockUser } from '@/lib/mock-data';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { UserAvatar } from '@/components/shared/user-avatar';
+import { signOut } from 'next-auth/react';
 import type { SidebarItemType } from '@/lib/db/items';
 import type { SidebarCollection } from '@/lib/db/collections';
 
@@ -23,16 +31,13 @@ export interface SidebarData {
   recentCollections: SidebarCollection[];
 }
 
-const PRO_TYPES = ['file', 'image'];
-
-function getInitials(name: string) {
-  return name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
+export interface SidebarUser {
+  name: string | null;
+  email: string | null;
+  image: string | null;
 }
+
+const PRO_TYPES = ['file', 'image'];
 
 function SectionHeader({
   label,
@@ -59,9 +64,10 @@ function SectionHeader({
 interface SidebarContentProps {
   collapsed?: boolean;
   sidebarData: SidebarData | null;
+  user: SidebarUser | null;
 }
 
-export function SidebarContent({ collapsed = false, sidebarData }: SidebarContentProps) {
+export function SidebarContent({ collapsed = false, sidebarData, user }: SidebarContentProps) {
   const [typesOpen, setTypesOpen] = useState(true);
   const [collectionsOpen, setCollectionsOpen] = useState(true);
 
@@ -197,47 +203,80 @@ export function SidebarContent({ collapsed = false, sidebarData }: SidebarConten
 
       {/* User area */}
       <div className='shrink-0 border-t border-border p-2'>
-        <div
-          className={`flex items-center gap-2.5 px-2 py-2 rounded-md hover:bg-accent transition-colors cursor-pointer ${
-            collapsed ? 'justify-center' : ''
-          }`}
-        >
-          <Avatar className='h-7 w-7 shrink-0'>
-            <AvatarFallback className='text-[11px] bg-blue-600 text-white'>
-              {getInitials(mockUser.name)}
-            </AvatarFallback>
-          </Avatar>
-          {!collapsed && (
-            <>
-              <div className='flex-1 min-w-0'>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            className={`w-full flex items-center gap-2.5 px-2 py-2 rounded-md hover:bg-accent transition-colors cursor-pointer ${
+              collapsed ? 'justify-center' : ''
+            }`}
+          >
+            <UserAvatar
+              name={user?.name}
+              image={user?.image}
+              size={28}
+              className='shrink-0'
+            />
+            {!collapsed && user && (
+              <div className='flex-1 min-w-0 text-left'>
                 <p className='text-xs font-medium text-foreground truncate'>
-                  {mockUser.name}
+                  {user.name}
                 </p>
                 <p className='text-[11px] text-muted-foreground truncate'>
-                  {mockUser.email}
+                  {user.email}
                 </p>
               </div>
-              <Settings className='h-4 w-4 text-muted-foreground shrink-0' />
-            </>
-          )}
-        </div>
+            )}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side='top' align='start' className='w-48'>
+            <DropdownMenuItem className='p-0'>
+              <Link
+                href='/profile'
+                className='flex w-full items-center gap-2 px-1.5 py-1 cursor-pointer'
+              >
+                <User className='h-4 w-4' />
+                Profile
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className='flex items-center gap-2 text-destructive focus:text-destructive cursor-pointer'
+              onClick={() => signOut({ callbackUrl: '/sign-in' })}
+            >
+              <LogOut className='h-4 w-4' />
+              Sign out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
 }
 
-export function Sidebar({ open, sidebarData }: { open: boolean; sidebarData: SidebarData | null }) {
+export function Sidebar({
+  open,
+  sidebarData,
+  user,
+}: {
+  open: boolean;
+  sidebarData: SidebarData | null;
+  user: SidebarUser | null;
+}) {
   return (
     <aside
       className={`hidden lg:flex flex-col shrink-0 border-r border-border bg-card transition-all duration-200 ${
         open ? 'w-56' : 'w-14'
       }`}
     >
-      <SidebarContent collapsed={!open} sidebarData={sidebarData} />
+      <SidebarContent collapsed={!open} sidebarData={sidebarData} user={user} />
     </aside>
   );
 }
 
-export function MobileSidebarContent({ sidebarData }: { sidebarData: SidebarData | null }) {
-  return <SidebarContent collapsed={false} sidebarData={sidebarData} />;
+export function MobileSidebarContent({
+  sidebarData,
+  user,
+}: {
+  sidebarData: SidebarData | null;
+  user: SidebarUser | null;
+}) {
+  return <SidebarContent collapsed={false} sidebarData={sidebarData} user={user} />;
 }
