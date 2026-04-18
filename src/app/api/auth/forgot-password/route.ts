@@ -2,11 +2,21 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { prisma } from '@/lib/prisma';
 import { sendPasswordResetEmail } from '@/lib/email';
+import { checkRateLimit, getClientIp, retryAfterSeconds } from '@/lib/rate-limit';
 
 const IDENTIFIER_PREFIX = 'password-reset:';
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+    const rl = await checkRateLimit('forgotPassword', ip);
+    if (!rl.success) {
+      return NextResponse.json(
+        { error: `Too many attempts. Please try again in ${retryAfterSeconds(rl.reset)} seconds.` },
+        { status: 429, headers: { 'Retry-After': String(retryAfterSeconds(rl.reset)) } }
+      );
+    }
+
     const { email } = await request.json();
 
     if (!email) {
