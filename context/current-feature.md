@@ -1,12 +1,26 @@
-# Current Feature
+# Current Feature: Email Verification on Register
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Send a verification email via Resend when a user registers with email/password
+- Email contains a unique, time-limited verification link
+- Users must click the link before they can sign in
+- Clicking the link marks the user as verified in the database
+- Show a clear message on the register page telling users to check their email
+- Handle edge cases: expired tokens, already-verified accounts, invalid tokens
+- Allow users to resend the verification email if needed
+
 ## Notes
+
+- Use Resend for email delivery; RESEND_API_KEY is already in .env
+- Reuse or extend the existing VerificationToken model in Prisma schema
+- Block sign-in for unverified users with a helpful error message
+- This only applies to email/password accounts — GitHub OAuth users are auto-verified
+- Keep a `/verify-email` page to handle the link click and show status
 
 ## History
 

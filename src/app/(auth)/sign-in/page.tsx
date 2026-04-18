@@ -78,7 +78,15 @@ export default function SignInPage() {
           </div>
 
           {error && (
-            <p className='text-sm text-destructive'>{error}</p>
+            <div className='space-y-1'>
+              <p className='text-sm text-destructive'>{error}</p>
+              <p className='text-xs text-muted-foreground'>
+                Recently registered?{' '}
+                <Link href='/verify-email' className='underline underline-offset-4 hover:text-foreground'>
+                  Verify your email
+                </Link>
+              </p>
+            </div>
           )}
 
           <Button type='submit' className='w-full' disabled={loading}>
