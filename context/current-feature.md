@@ -1,27 +1,12 @@
-# Current Feature: Items List View
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Create dynamic route `/items/[type]` (e.g., /items/snippets, /items/notes)
-- Fetch and display items filtered by type
-- Responsive grid of ItemCard components
-- Two columns on medium and up
-- Each card has left border colored by item type
-- Follow existing codebase patterns
-
 ## Notes
-
-- Sidebar links already point to `/items/${type.name}s` (e.g., `/items/snippets`) but the route doesn't exist
-- Needs `/items/layout.tsx` (same DashboardShell pattern as `/profile/layout.tsx`)
-- Needs `/items/[type]/page.tsx` — type param is plural (snippets, prompts, etc.)
-- Map plural URL slug → singular DB type name for query
-- Show pinned items first, then by createdAt desc
-- Use existing `ItemRow` component for each item
-- 404 for invalid type slugs
 
 ## History
 
@@ -103,3 +88,4 @@ In Progress
 - **Email Verification** - Resend SDK integration, verification tokens on registration, verification emails via src/lib/email.ts, GET /api/auth/verify endpoint, POST /api/auth/resend-verification endpoint, /verify-email page with verifying/success/error/resend states, sign-in blocked for unverified credential users, resend hint shown on sign-in failure, GitHub OAuth users unaffected (Completed)
 - **Email Verification Toggle** - SKIP_EMAIL_VERIFICATION env variable to bypass email verification during development, auto-verify on registration when enabled, API returns redirectTo field so client skips /verify-email, authorize skips unverified check, documented in .env.example with production warning (Completed)
 - **Rate Limiting for Auth** - Upstash Redis sliding window rate limiting on register (3/hr by IP), forgot-password (3/hr by IP), reset-password (5/15min by IP), resend-verification (3/15min by IP+email), credentials login (5/15min by IP+email via RateLimitError in authorize), 429 responses with Retry-After header, fail-open design, sign-in page shows distinct message for RATE_LIMITED error code (Completed)
+- **Items List View** - Dynamic route /items/[type] for type-filtered item lists, getItemsByType query with pinned-first sorting, /items/layout.tsx with DashboardShell, 2-column responsive grid using ItemRow, plural slug to singular type name mapping, 404 on invalid slugs, empty state (Completed)
