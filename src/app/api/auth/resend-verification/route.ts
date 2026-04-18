@@ -2,10 +2,23 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { prisma } from '@/lib/prisma';
 import { sendVerificationEmail } from '@/lib/email';
+import { checkRateLimit, getClientIp, retryAfterSeconds } from '@/lib/rate-limit';
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
     const { email } = await request.json();
+
+    // Key by IP + email to allow multiple users from same IP (e.g. office)
+    // while still limiting per-account abuse
+    const identifier = email ? `${ip}:${email}` : ip;
+    const rl = await checkRateLimit('resendVerification', identifier);
+    if (!rl.success) {
+      return NextResponse.json(
+        { error: `Too many attempts. Please try again in ${retryAfterSeconds(rl.reset)} seconds.` },
+        { status: 429, headers: { 'Retry-After': String(retryAfterSeconds(rl.reset)) } }
+      );
+    }
 
     if (!email) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });

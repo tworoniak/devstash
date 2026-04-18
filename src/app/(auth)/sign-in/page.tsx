@@ -30,7 +30,9 @@ export default function SignInPage() {
 
     setLoading(false);
 
-    if (result?.error) {
+    if (result?.error === 'RATE_LIMITED') {
+      setError('Too many sign-in attempts. Please try again later.');
+    } else if (result?.error) {
       setError('Invalid email or password');
     } else {
       router.push('/dashboard');

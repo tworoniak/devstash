@@ -1,11 +1,21 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
+import { checkRateLimit, getClientIp, retryAfterSeconds } from '@/lib/rate-limit';
 
 const IDENTIFIER_PREFIX = 'password-reset:';
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+    const rl = await checkRateLimit('resetPassword', ip);
+    if (!rl.success) {
+      return NextResponse.json(
+        { error: `Too many attempts. Please try again in ${retryAfterSeconds(rl.reset)} seconds.` },
+        { status: 429, headers: { 'Retry-After': String(retryAfterSeconds(rl.reset)) } }
+      );
+    }
+
     const { token, password, confirmPassword } = await request.json();
 
     if (!token || !password || !confirmPassword) {
