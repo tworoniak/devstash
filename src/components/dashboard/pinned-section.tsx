@@ -1,23 +1,15 @@
 import { Pin } from 'lucide-react';
-import { prisma } from '@/lib/prisma';
+import { auth } from '@/auth';
 import { getDashboardPinnedItems } from '@/lib/db/items';
 import { ItemRow } from './item-row';
-
-async function getDemoUserId() {
-  const user = await prisma.user.findUnique({
-    where: { email: 'demo@devstash.io' },
-    select: { id: true },
-  });
-  return user?.id ?? null;
-}
 
 export async function PinnedSection() {
   let items: Awaited<ReturnType<typeof getDashboardPinnedItems>> = [];
 
   try {
-    const userId = await getDemoUserId();
-    if (userId) {
-      items = await getDashboardPinnedItems(userId);
+    const session = await auth();
+    if (session?.user?.id) {
+      items = await getDashboardPinnedItems(session.user.id);
     }
   } catch (err) {
     console.error('Failed to load pinned items:', err);

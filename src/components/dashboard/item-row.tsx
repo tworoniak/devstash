@@ -1,6 +1,9 @@
+'use client';
+
 import { Code, Star, Pin } from 'lucide-react';
 import { ICON_MAP } from '@/lib/constants/icon-map';
 import { formatDate } from '@/lib/utils';
+import { useItemDrawer } from '@/components/items/item-drawer-provider';
 
 interface ItemRowProps {
   item: {
@@ -19,6 +22,7 @@ interface ItemRowProps {
 }
 
 export function ItemRow({ item }: ItemRowProps) {
+  const { openDrawer } = useItemDrawer();
   const Icon = ICON_MAP[item.itemType.icon] ?? Code;
   const color = item.itemType.color;
 
@@ -26,6 +30,7 @@ export function ItemRow({ item }: ItemRowProps) {
     <div
       className="group flex items-start gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer border border-border"
       style={{ borderLeftColor: color, borderLeftWidth: '3px' }}
+      onClick={() => openDrawer(item.id)}
     >
       {/* Type icon */}
       <div
