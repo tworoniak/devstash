@@ -1,29 +1,16 @@
-# Current Feature: Forgot Password
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add "Forgot password?" link on the sign-in page
-- Create `/forgot-password` page with email input form
-- Create `/reset-password` page with new password form
-- POST `/api/auth/forgot-password` endpoint — generates a reset token using the existing `VerificationToken` model and sends a reset email via Resend
-- GET/POST `/api/auth/reset-password` endpoint — validates token, updates user password, invalidates token
-- Send password reset email with a link to `/reset-password?token=...`
-- Token expiry (e.g. 1 hour)
-- Handle edge cases: unknown email (silent success), expired token, already-used token
-
 ## Notes
-
-- Reuse the existing `VerificationToken` model (identifier + token + expires fields)
-- Use a prefix on the identifier (e.g. `password-reset:email@example.com`) to distinguish from email verification tokens
-- Follow the existing email/auth patterns in `src/lib/email.ts` and `src/app/api/auth/`
-- Password hashing with bcrypt (rounds=12) consistent with registration
 
 ## History
 
+- **Forgot Password** - Forgot password link on sign-in, /forgot-password and /reset-password pages, API endpoints for token generation and password reset, password reset emails via Resend, reuses VerificationToken model with password-reset: prefix, 1-hour token expiry, edge case handling (Completed)
 - **Stats & Sidebar** - Real database data for stats cards (getDashboardStats), sidebar item types with counts (getSidebarItemTypes), favorite/recent collections with colored circle indicators (getSidebarFavoriteCollections/getSidebarRecentCollections), "View all collections" link, sidebarData fetched in dashboard layout and threaded through DashboardShell → TopBar/Sidebar as props, mobile sheet X overlap fixed with pt-10 (Completed)
 - **Dashboard Items** - Real database data for pinned and recent items, getDashboardPinnedItems/getDashboardRecentItems queries in src/lib/db/items.ts, itemType icon/color passed directly to ItemRow (dropped mockItemTypes lookup), try/catch error handling, empty states (Completed)
 - **Dashboard Collections** - Real database data for collections section, dynamic border colors from most-used item type, type icons display, server component data fetching with Prisma (Completed)
