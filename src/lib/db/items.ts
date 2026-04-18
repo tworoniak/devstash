@@ -86,3 +86,14 @@ export async function getDashboardRecentItems(userId: string): Promise<Dashboard
     select: itemSelect,
   });
 }
+
+export async function getItemsByType(userId: string, typeName: string): Promise<DashboardItem[]> {
+  return prisma.item.findMany({
+    where: {
+      userId,
+      itemType: { name: typeName },
+    },
+    orderBy: [{ isPinned: 'desc' }, { createdAt: 'desc' }],
+    select: itemSelect,
+  });
+}

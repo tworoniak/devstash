@@ -1,12 +1,27 @@
-# Current Feature
+# Current Feature: Items List View
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Create dynamic route `/items/[type]` (e.g., /items/snippets, /items/notes)
+- Fetch and display items filtered by type
+- Responsive grid of ItemCard components
+- Two columns on medium and up
+- Each card has left border colored by item type
+- Follow existing codebase patterns
+
 ## Notes
+
+- Sidebar links already point to `/items/${type.name}s` (e.g., `/items/snippets`) but the route doesn't exist
+- Needs `/items/layout.tsx` (same DashboardShell pattern as `/profile/layout.tsx`)
+- Needs `/items/[type]/page.tsx` — type param is plural (snippets, prompts, etc.)
+- Map plural URL slug → singular DB type name for query
+- Show pinned items first, then by createdAt desc
+- Use existing `ItemRow` component for each item
+- 404 for invalid type slugs
 
 ## History
 
