@@ -1,26 +1,12 @@
-# Current Feature: Email Verification on Register
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Send a verification email via Resend when a user registers with email/password
-- Email contains a unique, time-limited verification link
-- Users must click the link before they can sign in
-- Clicking the link marks the user as verified in the database
-- Show a clear message on the register page telling users to check their email
-- Handle edge cases: expired tokens, already-verified accounts, invalid tokens
-- Allow users to resend the verification email if needed
-
 ## Notes
-
-- Use Resend for email delivery; RESEND_API_KEY is already in .env
-- Reuse or extend the existing VerificationToken model in Prisma schema
-- Block sign-in for unverified users with a helpful error message
-- This only applies to email/password accounts — GitHub OAuth users are auto-verified
-- Keep a `/verify-email` page to handle the link click and show status
 
 ## History
 
@@ -97,3 +83,4 @@ In Progress
 - **Vercel Analytics** - Installed @vercel/analytics package, added Analytics component to root layout for page view tracking across all pages (Completed)
 - **Auth Credentials (Email/Password)** - Credentials provider added to split config pattern: edge-safe `authorize: () => null` placeholder in auth.config.ts, real bcrypt validation in auth.ts overriding the placeholder, POST /api/auth/register with field validation, password match check, duplicate email check, bcrypt hashing (rounds=12), user creation (Completed)
 - **Auth Setup Phase 3** - Custom sign-in and register pages, reusable UserAvatar component with image/initials fallback, sidebar user dropdown with profile link and sign out, Sonner toast notifications, dashboard uses authenticated session, JWT/session callbacks for user.id, GitHub avatar remote pattern in next.config.ts (Completed)
+- **Email Verification** - Resend SDK integration, verification tokens on registration, verification emails via src/lib/email.ts, GET /api/auth/verify endpoint, POST /api/auth/resend-verification endpoint, /verify-email page with verifying/success/error/resend states, sign-in blocked for unverified credential users, resend hint shown on sign-in failure, GitHub OAuth users unaffected (Completed)
