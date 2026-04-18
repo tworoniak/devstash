@@ -1,23 +1,15 @@
 import { Clock } from 'lucide-react';
-import { prisma } from '@/lib/prisma';
+import { auth } from '@/auth';
 import { getDashboardRecentItems } from '@/lib/db/items';
 import { ItemRow } from './item-row';
-
-async function getDemoUserId() {
-  const user = await prisma.user.findUnique({
-    where: { email: 'demo@devstash.io' },
-    select: { id: true },
-  });
-  return user?.id ?? null;
-}
 
 export async function RecentSection() {
   let items: Awaited<ReturnType<typeof getDashboardRecentItems>> = [];
 
   try {
-    const userId = await getDemoUserId();
-    if (userId) {
-      items = await getDashboardRecentItems(userId);
+    const session = await auth();
+    if (session?.user?.id) {
+      items = await getDashboardRecentItems(session.user.id);
     }
   } catch (err) {
     console.error('Failed to load recent items:', err);

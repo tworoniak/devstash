@@ -87,6 +87,55 @@ export async function getDashboardRecentItems(userId: string): Promise<Dashboard
   });
 }
 
+export interface ItemDetail {
+  id: string;
+  title: string;
+  description: string | null;
+  contentType: string;
+  content: string | null;
+  fileUrl: string | null;
+  fileName: string | null;
+  fileSize: number | null;
+  url: string | null;
+  language: string | null;
+  isFavorite: boolean;
+  isPinned: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  tags: { name: string }[];
+  collections: { collection: { id: string; name: string } }[];
+  itemType: { name: string; icon: string; color: string };
+}
+
+export async function getItemById(id: string, userId: string): Promise<ItemDetail | null> {
+  return prisma.item.findFirst({
+    where: { id, userId },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      contentType: true,
+      content: true,
+      fileUrl: true,
+      fileName: true,
+      fileSize: true,
+      url: true,
+      language: true,
+      isFavorite: true,
+      isPinned: true,
+      createdAt: true,
+      updatedAt: true,
+      tags: { select: { name: true } },
+      collections: {
+        select: {
+          collection: { select: { id: true, name: true } },
+        },
+      },
+      itemType: { select: { name: true, icon: true, color: true } },
+    },
+  });
+}
+
 export async function getItemsByType(userId: string, typeName: string): Promise<DashboardItem[]> {
   return prisma.item.findMany({
     where: {
