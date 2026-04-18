@@ -1,27 +1,16 @@
-# Current Feature: Profile Page
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Profile page at `/profile` route (protected, requires auth)
-- Display user info: email, name, avatar (GitHub image or initials fallback), account creation date
-- Show usage stats: total items, total collections, breakdown by item type (snippets, prompts, notes, commands, links, files, images)
-- Change password action (email/password users only — hidden for GitHub OAuth users)
-- Delete account with confirmation dialog to prevent accidental deletion
-
 ## Notes
-
-- Avatar: use GitHub avatar from OAuth if available, otherwise generate initials from name/email (reuse existing `UserAvatar` component)
-- Change password button only shown when user has a password set (i.e., not a GitHub-only account)
-- Delete account needs a confirmation dialog (shadcn AlertDialog)
-- Item type breakdown counts each system type individually
-- API endpoints needed: change password (`PATCH /api/user/password`) and delete account (`DELETE /api/user`)
 
 ## History
 
+- **Profile Page** - Profile page at /profile with user info, usage stats with item type breakdown, change password for email users, delete account with confirmation dialog, API endpoints for password change and account deletion (Completed)
 - **Forgot Password** - Forgot password link on sign-in, /forgot-password and /reset-password pages, API endpoints for token generation and password reset, password reset emails via Resend, reuses VerificationToken model with password-reset: prefix, 1-hour token expiry, edge case handling (Completed)
 - **Stats & Sidebar** - Real database data for stats cards (getDashboardStats), sidebar item types with counts (getSidebarItemTypes), favorite/recent collections with colored circle indicators (getSidebarFavoriteCollections/getSidebarRecentCollections), "View all collections" link, sidebarData fetched in dashboard layout and threaded through DashboardShell → TopBar/Sidebar as props, mobile sheet X overlap fixed with pt-10 (Completed)
 - **Dashboard Items** - Real database data for pinned and recent items, getDashboardPinnedItems/getDashboardRecentItems queries in src/lib/db/items.ts, itemType icon/color passed directly to ItemRow (dropped mockItemTypes lookup), try/catch error handling, empty states (Completed)
