@@ -1,24 +1,12 @@
-# Current Feature: Email Verification Toggle
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add a `SKIP_EMAIL_VERIFICATION` env variable that disables email verification when set to `true`
-- When skipped: auto-set `emailVerified` on registration so the user can sign in immediately
-- When skipped: don't block sign-in in the credentials `authorize` callback
-- When skipped: still create the user normally — just skip the token/email step
-- Default behavior (variable unset or `false`) keeps full verification active
-
 ## Notes
-
-- Env variable approach: `SKIP_EMAIL_VERIFICATION=true` in `.env` for local dev
-- Add it to `.env.example` with a comment explaining its purpose
-- Production should never set this — it should be absent or `false`
-- Read the var server-side only; never expose to the client
-- No UI needed — purely a backend/config toggle
 
 ## History
 
@@ -96,3 +84,4 @@ In Progress
 - **Auth Credentials (Email/Password)** - Credentials provider added to split config pattern: edge-safe `authorize: () => null` placeholder in auth.config.ts, real bcrypt validation in auth.ts overriding the placeholder, POST /api/auth/register with field validation, password match check, duplicate email check, bcrypt hashing (rounds=12), user creation (Completed)
 - **Auth Setup Phase 3** - Custom sign-in and register pages, reusable UserAvatar component with image/initials fallback, sidebar user dropdown with profile link and sign out, Sonner toast notifications, dashboard uses authenticated session, JWT/session callbacks for user.id, GitHub avatar remote pattern in next.config.ts (Completed)
 - **Email Verification** - Resend SDK integration, verification tokens on registration, verification emails via src/lib/email.ts, GET /api/auth/verify endpoint, POST /api/auth/resend-verification endpoint, /verify-email page with verifying/success/error/resend states, sign-in blocked for unverified credential users, resend hint shown on sign-in failure, GitHub OAuth users unaffected (Completed)
+- **Email Verification Toggle** - SKIP_EMAIL_VERIFICATION env variable to bypass email verification during development, auto-verify on registration when enabled, API returns redirectTo field so client skips /verify-email, authorize skips unverified check, documented in .env.example with production warning (Completed)
