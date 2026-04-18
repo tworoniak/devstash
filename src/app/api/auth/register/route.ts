@@ -39,25 +39,36 @@ export async function POST(request: Request) {
     }
 
     const hashed = await bcrypt.hash(password, 12);
+    const skipVerification = process.env.SKIP_EMAIL_VERIFICATION === 'true';
+
     await prisma.user.create({
-      data: { name, email, password: hashed },
+      data: {
+        name,
+        email,
+        password: hashed,
+        emailVerified: skipVerification ? new Date() : null,
+      },
     });
 
-    // Generate a 24-hour verification token and send email
-    const token = crypto.randomBytes(32).toString('hex');
-    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    if (!skipVerification) {
+      const token = crypto.randomBytes(32).toString('hex');
+      const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-    await prisma.verificationToken.create({
-      data: { identifier: email, token, expires },
-    });
+      await prisma.verificationToken.create({
+        data: { identifier: email, token, expires },
+      });
 
-    try {
-      await sendVerificationEmail(email, token);
-    } catch {
-      // User created and token stored — they can resend from /verify-email
+      try {
+        await sendVerificationEmail(email, token);
+      } catch {
+        // User created and token stored — they can resend from /verify-email
+      }
     }
 
-    return NextResponse.json({ success: true }, { status: 201 });
+    return NextResponse.json(
+      { success: true, redirectTo: skipVerification ? '/sign-in' : '/verify-email' },
+      { status: 201 }
+    );
   } catch {
     return NextResponse.json(
       { error: 'Internal server error' },

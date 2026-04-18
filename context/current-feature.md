@@ -1,12 +1,24 @@
-# Current Feature
+# Current Feature: Email Verification Toggle
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Add a `SKIP_EMAIL_VERIFICATION` env variable that disables email verification when set to `true`
+- When skipped: auto-set `emailVerified` on registration so the user can sign in immediately
+- When skipped: don't block sign-in in the credentials `authorize` callback
+- When skipped: still create the user normally — just skip the token/email step
+- Default behavior (variable unset or `false`) keeps full verification active
+
 ## Notes
+
+- Env variable approach: `SKIP_EMAIL_VERIFICATION=true` in `.env` for local dev
+- Add it to `.env.example` with a comment explaining its purpose
+- Production should never set this — it should be absent or `false`
+- Read the var server-side only; never expose to the client
+- No UI needed — purely a backend/config toggle
 
 ## History
 

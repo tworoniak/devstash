@@ -47,7 +47,7 @@ export default function RegisterPage() {
       return;
     }
 
-    router.push('/verify-email');
+    router.push(data.redirectTo ?? '/verify-email');
   }
 
   return (
