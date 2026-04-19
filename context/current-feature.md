@@ -1,27 +1,16 @@
-# Current Feature: Pinned Items
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- `toggleItemPin` server action created and wired up
-- Pin button in ItemDrawer is clickable and toggles `isPinned` on the item
-- Optimistic UI so the button state updates instantly without waiting for the server
-- Toast notification on success/error
-- Pinned items sort to the top of `/items/[type]` listings
-- Pinned items appear in the dashboard Pinned Items section
-- Pin icon on ItemCard remains a static read-only indicator (no click handler)
-
 ## Notes
-
-- Follow the Favorite Button pattern for optimistic state + server action wiring
-- Items only — no pinning for collections
-- `isPinned` field already exists on the Item model
 
 ## History
 
+- **Pinned Items** - toggleItemPin db query with ownership check; toggleItemPin server action with auth guard; Pin button in ItemDrawer wired with optimistic local state (synced on item load, flips instantly, reverts on error), toast on success/error, router.refresh() syncs list; pinned-first sort in getItemsByType and dashboard getDashboardPinnedItems were already correct (Completed)
 - **Homepage Mockup** - Standalone marketing prototype at prototypes/homepage/ (index.html, styles.css, script.js); hero with animated chaos-to-order visual (8 floating icons bounce off walls + mouse repel via requestAnimationFrame), pulsing arrow, mini dashboard preview with colored item cards; fixed nav turns frosted glass on scroll, mobile hamburger menu; 6-card features grid with type accent colors + hover top-border reveal; AI section with code editor mockup and AI tag demo; pricing with monthly/yearly toggle ($8/mo → $6/mo billed $72/yr); CTA and footer; scroll fade-ins via IntersectionObserver; responsive mobile stack with 90° arrow rotation (Completed)
 - **File List View** - FileListRow component with extension-based icon (FileImage/FileCode/FileArchive/FileText/File), file name, size, upload date, hover-reveal download button (stopPropagation); files type page uses 1→2→3 column grid; gray left border accent + card border matching other item views; fileName/fileSize added to DashboardItem select; item drawer action bar changed to flex-wrap with Delete button moved inline (Completed)
 - **Image Gallery View** - ImageThumbnailCard component with aspect-video (16:9) thumbnails, object-cover, 5% hover zoom (300ms); images type page uses fixed 3-column gallery grid; fileUrl added to DashboardItem select; PRO badge repositioned inline next to label with count always on the right in sidebar; DevStash logo links to /dashboard when signed in, /sign-in when not (Completed)
