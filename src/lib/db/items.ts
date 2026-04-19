@@ -53,6 +53,8 @@ export interface DashboardItem {
   isPinned: boolean;
   createdAt: Date;
   fileUrl: string | null;
+  fileName: string | null;
+  fileSize: number | null;
   tags: { name: string }[];
   itemType: {
     icon: string;
@@ -68,6 +70,8 @@ const itemSelect = {
   isPinned: true,
   createdAt: true,
   fileUrl: true,
+  fileName: true,
+  fileSize: true,
   tags: { select: { name: true } },
   itemType: { select: { icon: true, color: true } },
 } as const;

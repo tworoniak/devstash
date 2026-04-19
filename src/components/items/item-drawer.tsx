@@ -173,7 +173,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
   return (
     <>
     <Sheet open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
-      <SheetContent side="right" className="sm:max-w-lg overflow-y-auto p-0" showCloseButton>
+      <SheetContent side="right" className="sm:max-w-xl overflow-y-auto p-0" showCloseButton>
         {loading && <DrawerSkeleton />}
         {!loading && error && (
           <div className="flex items-center justify-center h-full p-8">
@@ -238,7 +238,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center gap-0.5 px-3 py-2 border-y border-border">
+              <div className="flex flex-wrap items-center gap-0.5 px-3 py-2 border-y border-border">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -275,12 +275,12 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                 </Button>
                 <Button
                   variant="ghost"
-                  size="icon"
-                  className="ml-auto text-muted-foreground hover:text-destructive"
+                  size="sm"
+                  className="gap-1.5 text-muted-foreground hover:text-destructive"
                   onClick={() => setDeleteConfirmOpen(true)}
                 >
                   <Trash2 className="h-4 w-4" />
-                  <span className="sr-only">Delete</span>
+                  Delete
                 </Button>
               </div>
             )}
