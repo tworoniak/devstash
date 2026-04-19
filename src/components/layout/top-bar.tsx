@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Search, Plus, FolderPlus, Menu, PanelLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,14 +35,17 @@ export function TopBar({ sidebarOpen, onSidebarToggle, sidebarData, user, onNewI
         </Button>
 
         {/* Logo */}
-        <div className='flex items-center gap-2 shrink-0'>
+        <Link
+          href={user ? '/dashboard' : '/sign-in'}
+          className='flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity'
+        >
           <div className='w-7 h-7 rounded-md bg-blue-600 flex items-center justify-center text-white text-xs font-bold'>
             DS
           </div>
           <span className='font-semibold text-sm hidden sm:block'>
             DevStash
           </span>
-        </div>
+        </Link>
 
         {/* Sidebar toggle — desktop only */}
         <Button

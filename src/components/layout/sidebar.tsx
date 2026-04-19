@@ -109,19 +109,19 @@ export function SidebarContent({ collapsed = false, sidebarData, user }: Sidebar
                   />
                   {!collapsed && (
                     <>
-                      <span className='flex-1 capitalize'>{type.name}s</span>
-                      {isPro ? (
+                      <span className='capitalize'>{type.name}s</span>
+                      {isPro && (
                         <Badge
                           variant='outline'
                           className='text-[9px] px-1 py-0 h-4 border-amber-500/50 text-amber-500'
                         >
                           PRO
                         </Badge>
-                      ) : (
-                        <span className='text-xs text-muted-foreground/60'>
-                          {type.count}
-                        </span>
                       )}
+                      <span className='flex-1' />
+                      <span className='text-xs text-muted-foreground/60'>
+                        {type.count}
+                      </span>
                     </>
                   )}
                 </Link>

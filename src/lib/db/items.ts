@@ -52,6 +52,7 @@ export interface DashboardItem {
   isFavorite: boolean;
   isPinned: boolean;
   createdAt: Date;
+  fileUrl: string | null;
   tags: { name: string }[];
   itemType: {
     icon: string;
@@ -66,6 +67,7 @@ const itemSelect = {
   isFavorite: true,
   isPinned: true,
   createdAt: true,
+  fileUrl: true,
   tags: { select: { name: true } },
   itemType: { select: { icon: true, color: true } },
 } as const;
