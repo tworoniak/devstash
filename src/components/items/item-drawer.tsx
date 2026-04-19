@@ -29,6 +29,7 @@ import { formatDate } from '@/lib/utils';
 import { updateItem, deleteItem } from '@/actions/items';
 import { toast } from 'sonner';
 import { CodeEditor } from '@/components/items/code-editor';
+import { MarkdownEditor } from '@/components/items/markdown-editor';
 import type { ItemDetail } from '@/lib/db/items';
 
 const TEXT_CONTENT_TYPES = new Set(['snippet', 'prompt', 'command', 'note']);
@@ -312,13 +313,9 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                           onChange={(v) => updateField('content', v)}
                         />
                       ) : (
-                        <Textarea
-                          id="edit-content"
+                        <MarkdownEditor
                           value={editState.content}
-                          onChange={(e) => updateField('content', e.target.value)}
-                          placeholder="Content…"
-                          rows={8}
-                          className="text-sm font-mono resize-y"
+                          onChange={(v) => updateField('content', v)}
                         />
                       )}
                     </div>
@@ -424,9 +421,10 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                           readOnly
                         />
                       ) : (
-                        <pre className="text-xs bg-muted rounded-md p-3 overflow-x-auto whitespace-pre-wrap wrap-break-word leading-relaxed">
-                          {item.content}
-                        </pre>
+                        <MarkdownEditor
+                          value={item.content}
+                          readOnly
+                        />
                       )}
                     </div>
                   )}

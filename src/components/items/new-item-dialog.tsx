@@ -23,6 +23,7 @@ import { Label } from '@/components/ui/label';
 import { createItem } from '@/actions/items';
 import { toast } from 'sonner';
 import { CodeEditor } from '@/components/items/code-editor';
+import { MarkdownEditor } from '@/components/items/markdown-editor';
 
 const ITEM_TYPES = [
   { value: 'snippet', label: 'Snippet' },
@@ -209,13 +210,9 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
                   onChange={(v) => setField('content', v)}
                 />
               ) : (
-                <Textarea
-                  id="item-content"
+                <MarkdownEditor
                   value={form.content}
-                  onChange={(e) => setField('content', e.target.value)}
-                  placeholder="Content…"
-                  rows={6}
-                  className="text-sm font-mono resize-y"
+                  onChange={(v) => setField('content', v)}
                 />
               )}
             </div>
