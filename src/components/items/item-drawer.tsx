@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Code, Star, Pin, Copy, Pencil, Trash2, Save, X } from 'lucide-react';
+import { Code, Star, Pin, Copy, Pencil, Trash2, Save, X, Download, FileText, ImageIcon } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -25,6 +25,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { ICON_MAP } from '@/lib/constants/icon-map';
+import { buttonVariants } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils';
 import { updateItem, deleteItem } from '@/actions/items';
 import { toast } from 'sonner';
@@ -33,6 +34,12 @@ import { MarkdownEditor } from '@/components/items/markdown-editor';
 import type { ItemDetail } from '@/lib/db/items';
 
 const TEXT_CONTENT_TYPES = new Set(['snippet', 'prompt', 'command', 'note']);
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 const LANGUAGE_TYPES = new Set(['snippet', 'command']);
 
 interface ItemDrawerProps {
@@ -161,6 +168,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
   const showContent = TEXT_CONTENT_TYPES.has(typeName);
   const showLanguage = LANGUAGE_TYPES.has(typeName);
   const showUrl = typeName === 'link';
+  const showFileItem = typeName === 'file' || typeName === 'image';
 
   return (
     <>
@@ -251,6 +259,16 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                   <Copy className="h-4 w-4" />
                   Copy
                 </Button>
+                {showFileItem && item.fileUrl && (
+                  <a
+                    href={`/api/download/${item.id}`}
+                    download={item.fileName ?? undefined}
+                    className={buttonVariants({ variant: 'ghost', size: 'sm' }) + ' gap-1.5'}
+                  >
+                    <Download className="h-4 w-4" />
+                    Download
+                  </a>
+                )}
                 <Button variant="ghost" size="sm" className="gap-1.5" onClick={handleEditStart}>
                   <Pencil className="h-4 w-4" />
                   Edit
@@ -409,7 +427,52 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                     </div>
                   )}
 
-                  {item.content && (
+                  {showFileItem && item.fileUrl && (
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
+                        {typeName === 'image' ? 'Image' : 'File'}
+                      </p>
+                      {typeName === 'image' ? (
+                        <div className="rounded-lg border border-border overflow-hidden">
+                          <div className="bg-muted/30 flex items-center justify-center p-3 max-h-64 overflow-hidden">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={`${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${item.fileUrl}`}
+                              alt={item.fileName ?? item.title}
+                              className="max-h-56 max-w-full object-contain rounded"
+                            />
+                          </div>
+                          {item.fileName && (
+                            <div className="flex items-center gap-2 px-3 py-2 border-t border-border">
+                              <ImageIcon className="h-4 w-4 text-muted-foreground shrink-0" />
+                              <span className="text-sm truncate">{item.fileName}</span>
+                              {item.fileSize != null && (
+                                <span className="text-xs text-muted-foreground ml-auto shrink-0">
+                                  {formatFileSize(item.fileSize)}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-3 rounded-lg border border-border px-3 py-2.5">
+                          <FileText className="h-5 w-5 text-muted-foreground shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">
+                              {item.fileName ?? 'File'}
+                            </p>
+                            {item.fileSize != null && (
+                              <p className="text-xs text-muted-foreground">
+                                {formatFileSize(item.fileSize)}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {!showFileItem && item.content && (
                     <div>
                       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
                         Content

@@ -24,6 +24,8 @@ import { createItem } from '@/actions/items';
 import { toast } from 'sonner';
 import { CodeEditor } from '@/components/items/code-editor';
 import { MarkdownEditor } from '@/components/items/markdown-editor';
+import { FileUpload } from '@/components/items/file-upload';
+import type { UploadResult } from '@/components/items/file-upload';
 
 const ITEM_TYPES = [
   { value: 'snippet', label: 'Snippet' },
@@ -31,12 +33,15 @@ const ITEM_TYPES = [
   { value: 'command', label: 'Command' },
   { value: 'note', label: 'Note' },
   { value: 'link', label: 'Link' },
+  { value: 'file', label: 'File' },
+  { value: 'image', label: 'Image' },
 ] as const;
 
 type ItemTypeName = (typeof ITEM_TYPES)[number]['value'];
 
 const CONTENT_TYPES = new Set<ItemTypeName>(['snippet', 'prompt', 'command', 'note']);
 const LANGUAGE_TYPES = new Set<ItemTypeName>(['snippet', 'command']);
+const FILE_TYPES = new Set<ItemTypeName>(['file', 'image']);
 
 interface FormState {
   typeName: ItemTypeName;
@@ -46,6 +51,7 @@ interface FormState {
   url: string;
   language: string;
   tags: string;
+  uploadResult: UploadResult | null;
 }
 
 function defaultForm(): FormState {
@@ -57,6 +63,7 @@ function defaultForm(): FormState {
     url: '',
     language: '',
     tags: '',
+    uploadResult: null,
   };
 }
 
@@ -101,6 +108,9 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
       url: form.url || null,
       language: form.language || null,
       tags,
+      fileKey: form.uploadResult?.key ?? null,
+      fileName: form.uploadResult?.fileName ?? null,
+      fileSize: form.uploadResult?.fileSize ?? null,
     });
 
     setSaving(false);
@@ -118,10 +128,12 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
   const showContent = CONTENT_TYPES.has(form.typeName);
   const showLanguage = LANGUAGE_TYPES.has(form.typeName);
   const showUrl = form.typeName === 'link';
+  const showFileUpload = FILE_TYPES.has(form.typeName);
 
   const canSubmit =
     form.title.trim().length > 0 &&
-    (!showUrl || form.url.trim().length > 0);
+    (!showUrl || form.url.trim().length > 0) &&
+    (!showFileUpload || form.uploadResult !== null);
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) handleClose(); }}>
@@ -193,6 +205,22 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
                 placeholder="https://…"
                 type="url"
                 className="text-sm"
+              />
+            </div>
+          )}
+
+          {/* File upload — file/image only */}
+          {showFileUpload && (
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                {form.typeName === 'image' ? 'Image' : 'File'}{' '}
+                <span className="text-destructive">*</span>
+              </Label>
+              <FileUpload
+                itemType={form.typeName as 'file' | 'image'}
+                uploaded={form.uploadResult}
+                onUpload={(result) => setField('uploadResult', result)}
+                onRemove={() => setField('uploadResult', null)}
               />
             </div>
           )}
