@@ -1,12 +1,31 @@
-# Current Feature
+# Current Feature: Homepage Mockup
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Create a standalone marketing homepage at `prototypes/homepage/` (index.html, styles.css, script.js)
+- Hero section with animated "chaos to order" concept: floating icons (chaos) → pulsing arrow → dashboard preview
+- Chaos icons drift, bounce off walls, and repel from mouse cursor via requestAnimationFrame
+- Fixed nav with logo, Features/Pricing links, Sign In/Get Started buttons; becomes more opaque on scroll
+- Features section: 6 cards (Code Snippets, AI Prompts, Instant Search, Commands, Files & Docs, Collections) with item type accent colors
+- AI section: Pro badge + feature checklist on left, code editor mockup with AI tag demo on right
+- Pricing section: Free vs Pro cards, Pro highlighted with "Most Popular"; yearly toggle ($72/yr option)
+- CTA and Footer sections
+- Scroll-triggered fade-in animations
+- Fully responsive: chaos/arrow/dashboard stacks vertically on mobile, arrow rotates 90°
+
 ## Notes
+
+- Output: `prototypes/homepage/index.html`, `styles.css`, `script.js` — standalone HTML/CSS/JS (no framework)
+- Reference screenshots: `context/screenshots/homepage-full-visible.png` and `context/screenshots/homepage-mobile.png`
+- Dark theme; item type accent colors:
+  - Snippet: #3b82f6 (Blue), Prompt: #f59e0b (Amber), Command: #06b6d4 (Cyan)
+  - Note: #22c55e (Green), File: #64748b (Slate), Image: #ec4899 (Pink), URL: #6366f1 (Indigo)
+- Chaos icons: Notion, GitHub, Slack, VS Code logos + browser tabs, terminal, text file, bookmark icons
+- Dashboard preview (right side of hero): sidebar with nav items + grid of item cards with colored top borders
 
 ## History
 
