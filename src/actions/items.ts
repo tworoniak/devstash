@@ -2,6 +2,7 @@
 
 import { z } from 'zod';
 import { auth } from '@/auth';
+import { r2Delete } from '@/lib/r2-api';
 import {
   updateItem as updateItemQuery,
   deleteItem as deleteItemQuery,
@@ -61,7 +62,7 @@ export async function updateItem(
   }
 }
 
-const CREATE_ITEM_TYPES = ['snippet', 'prompt', 'command', 'note', 'link'] as const;
+const CREATE_ITEM_TYPES = ['snippet', 'prompt', 'command', 'note', 'link', 'file', 'image'] as const;
 
 const CreateItemSchema = z
   .object({
@@ -72,6 +73,9 @@ const CreateItemSchema = z
     url: z.string().trim().nullable().optional(),
     language: z.string().trim().nullable().optional(),
     tags: z.array(z.string().trim().min(1)).default([]),
+    fileKey: z.string().nullable().optional(),
+    fileName: z.string().nullable().optional(),
+    fileSize: z.number().nullable().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.typeName === 'link') {
@@ -81,6 +85,15 @@ const CreateItemSchema = z
           code: z.ZodIssueCode.custom,
           message: 'A valid URL is required for links',
           path: ['url'],
+        });
+      }
+    }
+    if (data.typeName === 'file' || data.typeName === 'image') {
+      if (!data.fileKey) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'A file must be uploaded',
+          path: ['fileKey'],
         });
       }
     }
@@ -100,7 +113,8 @@ export async function createItem(input: CreateItemInput): Promise<ActionResult<D
     return { success: false, error: message };
   }
 
-  const { typeName, title, description, content, url, language, tags } = parsed.data;
+  const { typeName, title, description, content, url, language, tags, fileKey, fileName, fileSize } =
+    parsed.data;
 
   try {
     const created = await createItemQuery(session.user.id, {
@@ -111,6 +125,9 @@ export async function createItem(input: CreateItemInput): Promise<ActionResult<D
       language: language ?? null,
       tags,
       typeName,
+      fileKey: fileKey ?? null,
+      fileName: fileName ?? null,
+      fileSize: fileSize ?? null,
     });
     return { success: true, data: created };
   } catch {
@@ -125,10 +142,20 @@ export async function deleteItem(itemId: string): Promise<ActionResult<void>> {
   }
 
   try {
-    const deleted = await deleteItemQuery(itemId, session.user.id);
-    if (!deleted) {
+    const result = await deleteItemQuery(itemId, session.user.id);
+    if (!result.deleted) {
       return { success: false, error: 'Item not found' };
     }
+
+    if (result.fileKey) {
+      try {
+        await r2Delete(result.fileKey);
+      } catch {
+        // Non-fatal: DB row is gone, log and continue
+        console.error('Failed to delete R2 object:', result.fileKey);
+      }
+    }
+
     return { success: true, data: undefined };
   } catch {
     return { success: false, error: 'Failed to delete item' };

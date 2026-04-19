@@ -195,12 +195,18 @@ export async function updateItem(
   });
 }
 
-export async function deleteItem(id: string, userId: string): Promise<boolean> {
-  const existing = await prisma.item.findFirst({ where: { id, userId }, select: { id: true } });
-  if (!existing) return false;
+export async function deleteItem(
+  id: string,
+  userId: string
+): Promise<{ deleted: boolean; fileKey: string | null }> {
+  const existing = await prisma.item.findFirst({
+    where: { id, userId },
+    select: { id: true, fileUrl: true },
+  });
+  if (!existing) return { deleted: false, fileKey: null };
 
   await prisma.item.delete({ where: { id } });
-  return true;
+  return { deleted: true, fileKey: existing.fileUrl };
 }
 
 export interface CreateItemData {
@@ -211,6 +217,9 @@ export interface CreateItemData {
   language: string | null;
   tags: string[];
   typeName: string;
+  fileKey?: string | null;
+  fileName?: string | null;
+  fileSize?: number | null;
 }
 
 export async function createItem(userId: string, data: CreateItemData): Promise<DashboardItem> {
@@ -221,7 +230,8 @@ export async function createItem(userId: string, data: CreateItemData): Promise<
 
   if (!itemType) throw new Error(`Item type not found: ${data.typeName}`);
 
-  const contentType = data.typeName === 'link' ? 'URL' : 'TEXT';
+  const isFileType = data.typeName === 'file' || data.typeName === 'image';
+  const contentType = data.typeName === 'link' ? 'URL' : isFileType ? 'FILE' : 'TEXT';
 
   return prisma.item.create({
     data: {
@@ -230,6 +240,9 @@ export async function createItem(userId: string, data: CreateItemData): Promise<
       content: data.content,
       url: data.url,
       language: data.language,
+      fileUrl: data.fileKey ?? null,
+      fileName: data.fileName ?? null,
+      fileSize: data.fileSize ?? null,
       contentType,
       userId,
       itemTypeId: itemType.id,
