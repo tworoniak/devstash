@@ -22,6 +22,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { createItem } from '@/actions/items';
 import { toast } from 'sonner';
+import { CodeEditor } from '@/components/items/code-editor';
 
 const ITEM_TYPES = [
   { value: 'snippet', label: 'Snippet' },
@@ -198,17 +199,25 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
           {/* Content — snippet, prompt, command, note */}
           {showContent && (
             <div className="space-y-1.5">
-              <Label htmlFor="item-content" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                 Content
               </Label>
-              <Textarea
-                id="item-content"
-                value={form.content}
-                onChange={(e) => setField('content', e.target.value)}
-                placeholder="Content…"
-                rows={6}
-                className="text-sm font-mono resize-y"
-              />
+              {showLanguage ? (
+                <CodeEditor
+                  value={form.content}
+                  language={form.language}
+                  onChange={(v) => setField('content', v)}
+                />
+              ) : (
+                <Textarea
+                  id="item-content"
+                  value={form.content}
+                  onChange={(e) => setField('content', e.target.value)}
+                  placeholder="Content…"
+                  rows={6}
+                  className="text-sm font-mono resize-y"
+                />
+              )}
             </div>
           )}
 

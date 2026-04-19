@@ -28,6 +28,7 @@ import { ICON_MAP } from '@/lib/constants/icon-map';
 import { formatDate } from '@/lib/utils';
 import { updateItem, deleteItem } from '@/actions/items';
 import { toast } from 'sonner';
+import { CodeEditor } from '@/components/items/code-editor';
 import type { ItemDetail } from '@/lib/db/items';
 
 const TEXT_CONTENT_TYPES = new Set(['snippet', 'prompt', 'command', 'note']);
@@ -301,17 +302,25 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
 
                   {showContent && (
                     <div className="space-y-1.5">
-                      <Label htmlFor="edit-content" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                         Content
                       </Label>
-                      <Textarea
-                        id="edit-content"
-                        value={editState.content}
-                        onChange={(e) => updateField('content', e.target.value)}
-                        placeholder="Content…"
-                        rows={8}
-                        className="text-sm font-mono resize-y"
-                      />
+                      {showLanguage ? (
+                        <CodeEditor
+                          value={editState.content}
+                          language={editState.language}
+                          onChange={(v) => updateField('content', v)}
+                        />
+                      ) : (
+                        <Textarea
+                          id="edit-content"
+                          value={editState.content}
+                          onChange={(e) => updateField('content', e.target.value)}
+                          placeholder="Content…"
+                          rows={8}
+                          className="text-sm font-mono resize-y"
+                        />
+                      )}
                     </div>
                   )}
 
@@ -408,9 +417,17 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
                         Content
                       </p>
-                      <pre className="text-xs bg-muted rounded-md p-3 overflow-x-auto whitespace-pre-wrap wrap-break-word leading-relaxed">
-                        {item.content}
-                      </pre>
+                      {showLanguage ? (
+                        <CodeEditor
+                          value={item.content}
+                          language={item.language ?? undefined}
+                          readOnly
+                        />
+                      ) : (
+                        <pre className="text-xs bg-muted rounded-md p-3 overflow-x-auto whitespace-pre-wrap wrap-break-word leading-relaxed">
+                          {item.content}
+                        </pre>
+                      )}
                     </div>
                   )}
 

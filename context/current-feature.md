@@ -1,15 +1,28 @@
-# Current Feature
+# Current Feature: Code Editor
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Create `CodeEditor` component using Monaco Editor with dark theme
+- Replace `Textarea` with `CodeEditor` for snippets and commands only (keep `Textarea` for notes, prompts, and other non-code types)
+- Add macOS-style window dots (red/yellow/green) at top of editor
+- Add quick copy button in editor header
+- Display current language label in editor header next to copy button
+- Support both display (readonly) and edit modes
+- Fluid height editor with a max height of 400px and a styled scrollbar matching the dark theme
+
 ## Notes
+
+- Only snippet and command item types use the code editor
+- All other types (note, prompt, link, file, image) keep the existing textarea
+- Must work in both the item drawer view mode and edit mode
 
 ## History
 
+- **Item Create** - New Item button in top bar opens shadcn Dialog, type selector (snippet/prompt/command/note/link), dynamic fields per type (content, language, URL), createItem server action with Zod validation, createItem db query in lib/db/items.ts, toast on success, modal close and list refresh via router.refresh() (Completed)
 - **Item Delete** - Delete button in item drawer opens shadcn AlertDialog confirmation, deleteItem server action with auth/ownership validation, Sonner toast on success/error, drawer closes and list refreshes via router.refresh() after deletion (Completed)
 - **Profile Page** - Profile page at /profile with user info, usage stats with item type breakdown, change password for email users, delete account with confirmation dialog, API endpoints for password change and account deletion (Completed)
 - **Forgot Password** - Forgot password link on sign-in, /forgot-password and /reset-password pages, API endpoints for token generation and password reset, password reset emails via Resend, reuses VerificationToken model with password-reset: prefix, 1-hour token expiry, edge case handling (Completed)
