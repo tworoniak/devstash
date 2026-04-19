@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Code, Star, Pin, Copy, Pencil, Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Code, Star, Pin, Copy, Pencil, Trash2, Save, X } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -10,28 +11,64 @@ import {
 } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { ICON_MAP } from '@/lib/constants/icon-map';
 import { formatDate } from '@/lib/utils';
+import { updateItem } from '@/actions/items';
+import { toast } from 'sonner';
 import type { ItemDetail } from '@/lib/db/items';
+
+const TEXT_CONTENT_TYPES = new Set(['snippet', 'prompt', 'command', 'note']);
+const LANGUAGE_TYPES = new Set(['snippet', 'command']);
 
 interface ItemDrawerProps {
   itemId: string | null;
   onClose: () => void;
 }
 
+interface EditState {
+  title: string;
+  description: string;
+  content: string;
+  url: string;
+  language: string;
+  tags: string;
+}
+
+function itemToEditState(item: ItemDetail): EditState {
+  return {
+    title: item.title,
+    description: item.description ?? '',
+    content: item.content ?? '',
+    url: item.url ?? '',
+    language: item.language ?? '',
+    tags: item.tags.map((t) => t.name).join(', '),
+  };
+}
+
 export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
+  const router = useRouter();
   const [item, setItem] = useState<ItemDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [editState, setEditState] = useState<EditState | null>(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!itemId) {
       setItem(null);
       setError(false);
+      setEditMode(false);
+      setEditState(null);
       return;
     }
     setLoading(true);
     setError(false);
+    setEditMode(false);
+    setEditState(null);
     fetch(`/api/items/${itemId}`)
       .then((r) => {
         if (!r.ok) throw new Error(`${r.status}`);
@@ -42,9 +79,59 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
       .finally(() => setLoading(false));
   }, [itemId]);
 
+  function handleEditStart() {
+    if (!item) return;
+    setEditState(itemToEditState(item));
+    setEditMode(true);
+  }
+
+  function handleCancel() {
+    setEditMode(false);
+    setEditState(null);
+  }
+
+  async function handleSave() {
+    if (!item || !editState) return;
+    setSaving(true);
+    const tags = editState.tags
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
+
+    const result = await updateItem(item.id, {
+      title: editState.title,
+      description: editState.description || null,
+      content: editState.content || null,
+      url: editState.url || null,
+      language: editState.language || null,
+      tags,
+    });
+
+    setSaving(false);
+
+    if (!result.success) {
+      toast.error(result.error);
+      return;
+    }
+
+    setItem(result.data);
+    setEditMode(false);
+    setEditState(null);
+    toast.success('Item updated');
+    router.refresh();
+  }
+
+  function updateField(field: keyof EditState, value: string) {
+    setEditState((prev) => prev ? { ...prev, [field]: value } : prev);
+  }
+
   const open = !!itemId;
   const Icon = item ? (ICON_MAP[item.itemType.icon] ?? Code) : Code;
   const color = item?.itemType.color ?? '#6b7280';
+  const typeName = item?.itemType.name ?? '';
+  const showContent = TEXT_CONTENT_TYPES.has(typeName);
+  const showLanguage = LANGUAGE_TYPES.has(typeName);
+  const showUrl = typeName === 'link';
 
   return (
     <Sheet open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
@@ -69,136 +156,282 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                 <Badge variant="secondary" className="text-xs capitalize">
                   {item.itemType.name}
                 </Badge>
-                {item.language && (
+                {!editMode && item.language && (
                   <Badge variant="outline" className="text-xs">
                     {item.language}
                   </Badge>
                 )}
               </div>
-              <SheetTitle className="text-base leading-snug pr-8">
-                {item.title}
-              </SheetTitle>
+              {editMode ? (
+                <Input
+                  value={editState?.title ?? ''}
+                  onChange={(e) => updateField('title', e.target.value)}
+                  className="text-base font-semibold pr-8"
+                  placeholder="Title"
+                />
+              ) : (
+                <SheetTitle className="text-base leading-snug pr-8">
+                  {item.title}
+                </SheetTitle>
+              )}
             </SheetHeader>
 
             {/* Action bar */}
-            <div className="flex items-center gap-0.5 px-3 py-2 border-y border-border">
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`gap-1.5 ${item.isFavorite ? 'text-amber-400' : ''}`}
-              >
-                <Star className={`h-4 w-4 ${item.isFavorite ? 'fill-amber-400' : ''}`} />
-                Favorite
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`gap-1.5 ${item.isPinned ? 'text-blue-400' : ''}`}
-              >
-                <Pin className={`h-4 w-4 ${item.isPinned ? 'fill-blue-400' : ''}`} />
-                Pin
-              </Button>
-              <Button variant="ghost" size="sm" className="gap-1.5">
-                <Copy className="h-4 w-4" />
-                Copy
-              </Button>
-              <Button variant="ghost" size="sm" className="gap-1.5">
-                <Pencil className="h-4 w-4" />
-                Edit
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="ml-auto text-muted-foreground hover:text-destructive"
-              >
-                <Trash2 className="h-4 w-4" />
-                <span className="sr-only">Delete</span>
-              </Button>
-            </div>
+            {editMode ? (
+              <div className="flex items-center gap-2 px-3 py-2 border-y border-border">
+                <Button
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={handleSave}
+                  disabled={saving || !editState?.title.trim()}
+                >
+                  <Save className="h-4 w-4" />
+                  {saving ? 'Saving…' : 'Save'}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={handleCancel}
+                  disabled={saving}
+                >
+                  <X className="h-4 w-4" />
+                  Cancel
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-0.5 px-3 py-2 border-y border-border">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`gap-1.5 ${item.isFavorite ? 'text-amber-400' : ''}`}
+                >
+                  <Star className={`h-4 w-4 ${item.isFavorite ? 'fill-amber-400' : ''}`} />
+                  Favorite
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`gap-1.5 ${item.isPinned ? 'text-blue-400' : ''}`}
+                >
+                  <Pin className={`h-4 w-4 ${item.isPinned ? 'fill-blue-400' : ''}`} />
+                  Pin
+                </Button>
+                <Button variant="ghost" size="sm" className="gap-1.5">
+                  <Copy className="h-4 w-4" />
+                  Copy
+                </Button>
+                <Button variant="ghost" size="sm" className="gap-1.5" onClick={handleEditStart}>
+                  <Pencil className="h-4 w-4" />
+                  Edit
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="ml-auto text-muted-foreground hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span className="sr-only">Delete</span>
+                </Button>
+              </div>
+            )}
 
             {/* Body */}
             <div className="px-4 py-4 space-y-5">
-              {item.description && (
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
-                    Description
-                  </p>
-                  <p className="text-sm text-foreground leading-relaxed">{item.description}</p>
-                </div>
-              )}
-
-              {item.url && (
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
-                    URL
-                  </p>
-                  <a
-                    href={item.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-blue-400 hover:underline break-all"
-                  >
-                    {item.url}
-                  </a>
-                </div>
-              )}
-
-              {item.content && (
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
-                    Content
-                  </p>
-                  <pre className="text-xs bg-muted rounded-md p-3 overflow-x-auto whitespace-pre-wrap wrap-break-word leading-relaxed">
-                    {item.content}
-                  </pre>
-                </div>
-              )}
-
-              {item.tags.length > 0 && (
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
-                    Tags
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {item.tags.map((tag) => (
-                      <Badge key={tag.name} variant="secondary" className="text-xs">
-                        {tag.name}
-                      </Badge>
-                    ))}
+              {editMode && editState ? (
+                <>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="edit-description" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      Description
+                    </Label>
+                    <Textarea
+                      id="edit-description"
+                      value={editState.description}
+                      onChange={(e) => updateField('description', e.target.value)}
+                      placeholder="Optional description"
+                      rows={2}
+                      className="text-sm resize-none"
+                    />
                   </div>
-                </div>
-              )}
 
-              {item.collections.length > 0 && (
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
-                    Collections
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {item.collections.map(({ collection }) => (
-                      <Badge key={collection.id} variant="outline" className="text-xs">
-                        {collection.name}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
+                  {showUrl && (
+                    <div className="space-y-1.5">
+                      <Label htmlFor="edit-url" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        URL
+                      </Label>
+                      <Input
+                        id="edit-url"
+                        value={editState.url}
+                        onChange={(e) => updateField('url', e.target.value)}
+                        placeholder="https://…"
+                        type="url"
+                        className="text-sm"
+                      />
+                    </div>
+                  )}
 
-              <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
-                  Details
-                </p>
-                <div className="space-y-1 text-xs text-muted-foreground">
-                  <div className="flex justify-between">
-                    <span>Created</span>
-                    <span>{formatDate(new Date(item.createdAt))}</span>
+                  {showContent && (
+                    <div className="space-y-1.5">
+                      <Label htmlFor="edit-content" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        Content
+                      </Label>
+                      <Textarea
+                        id="edit-content"
+                        value={editState.content}
+                        onChange={(e) => updateField('content', e.target.value)}
+                        placeholder="Content…"
+                        rows={8}
+                        className="text-sm font-mono resize-y"
+                      />
+                    </div>
+                  )}
+
+                  {showLanguage && (
+                    <div className="space-y-1.5">
+                      <Label htmlFor="edit-language" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        Language
+                      </Label>
+                      <Input
+                        id="edit-language"
+                        value={editState.language}
+                        onChange={(e) => updateField('language', e.target.value)}
+                        placeholder="e.g. typescript"
+                        className="text-sm"
+                      />
+                    </div>
+                  )}
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="edit-tags" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      Tags
+                    </Label>
+                    <Input
+                      id="edit-tags"
+                      value={editState.tags}
+                      onChange={(e) => updateField('tags', e.target.value)}
+                      placeholder="react, hooks, auth"
+                      className="text-sm"
+                    />
+                    <p className="text-xs text-muted-foreground">Comma-separated</p>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Updated</span>
-                    <span>{formatDate(new Date(item.updatedAt))}</span>
+
+                  {/* Non-editable: collections + dates */}
+                  {item.collections.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
+                        Collections
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {item.collections.map(({ collection }) => (
+                          <Badge key={collection.id} variant="outline" className="text-xs">
+                            {collection.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
+                      Details
+                    </p>
+                    <div className="space-y-1 text-xs text-muted-foreground">
+                      <div className="flex justify-between">
+                        <span>Created</span>
+                        <span>{formatDate(new Date(item.createdAt))}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Updated</span>
+                        <span>{formatDate(new Date(item.updatedAt))}</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                </>
+              ) : (
+                <>
+                  {item.description && (
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
+                        Description
+                      </p>
+                      <p className="text-sm text-foreground leading-relaxed">{item.description}</p>
+                    </div>
+                  )}
+
+                  {item.url && (
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
+                        URL
+                      </p>
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-blue-400 hover:underline break-all"
+                      >
+                        {item.url}
+                      </a>
+                    </div>
+                  )}
+
+                  {item.content && (
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
+                        Content
+                      </p>
+                      <pre className="text-xs bg-muted rounded-md p-3 overflow-x-auto whitespace-pre-wrap wrap-break-word leading-relaxed">
+                        {item.content}
+                      </pre>
+                    </div>
+                  )}
+
+                  {item.tags.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
+                        Tags
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {item.tags.map((tag) => (
+                          <Badge key={tag.name} variant="secondary" className="text-xs">
+                            {tag.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {item.collections.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
+                        Collections
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {item.collections.map(({ collection }) => (
+                          <Badge key={collection.id} variant="outline" className="text-xs">
+                            {collection.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
+                      Details
+                    </p>
+                    <div className="space-y-1 text-xs text-muted-foreground">
+                      <div className="flex justify-between">
+                        <span>Created</span>
+                        <span>{formatDate(new Date(item.createdAt))}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Updated</span>
+                        <span>{formatDate(new Date(item.updatedAt))}</span>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </>
         )}
