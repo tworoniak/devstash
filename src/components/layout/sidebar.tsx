@@ -141,26 +141,31 @@ export function SidebarContent({ collapsed = false, sidebarData, user }: Sidebar
             {collectionsOpen && (
               <div className='space-y-3 mb-2'>
                 {/* Favorites */}
-                {favoriteCollections.length > 0 && (
-                  <div>
-                    <p className='px-3 pt-1 pb-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60'>
-                      Favorites
-                    </p>
-                    <nav className='px-1.5 space-y-0.5'>
-                      {favoriteCollections.map((col) => (
-                        <Link
-                          key={col.id}
-                          href={`/collections/${col.id}`}
-                          className='flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors'
-                        >
-                          <Folder className='h-3.5 w-3.5 shrink-0 text-muted-foreground/50' />
-                          <span className='flex-1 truncate'>{col.name}</span>
-                          <Star className='h-3 w-3 shrink-0 fill-amber-400 text-amber-400' />
-                        </Link>
-                      ))}
-                    </nav>
-                  </div>
-                )}
+                <div>
+                  <p className='px-3 pt-1 pb-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60'>
+                    Favorites
+                  </p>
+                  <nav className='px-1.5 space-y-0.5'>
+                    {favoriteCollections.map((col) => (
+                      <Link
+                        key={col.id}
+                        href={`/collections/${col.id}`}
+                        className='flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors'
+                      >
+                        <Folder className='h-3.5 w-3.5 shrink-0 text-muted-foreground/50' />
+                        <span className='flex-1 truncate'>{col.name}</span>
+                        <Star className='h-3 w-3 shrink-0 fill-amber-400 text-amber-400' />
+                      </Link>
+                    ))}
+                    <Link
+                      href='/favorites'
+                      className='flex items-center gap-1.5 px-2 py-1.5 rounded-md text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors'
+                    >
+                      <ChevronRight className='h-3 w-3' />
+                      View all favorites
+                    </Link>
+                  </nav>
+                </div>
 
                 {/* Recent collections */}
                 {recentCollections.length > 0 && (

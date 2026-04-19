@@ -27,7 +27,7 @@ import { Label } from '@/components/ui/label';
 import { ICON_MAP } from '@/lib/constants/icon-map';
 import { buttonVariants } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils';
-import { updateItem, deleteItem, toggleItemPin } from '@/actions/items';
+import { updateItem, deleteItem, toggleItemPin, toggleItemFavorite } from '@/actions/items';
 import { toast } from 'sonner';
 import { CodeEditor } from '@/components/items/code-editor';
 import { MarkdownEditor } from '@/components/items/markdown-editor';
@@ -78,9 +78,13 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
-    if (item) setIsPinned(item.isPinned);
+    if (item) {
+      setIsPinned(item.isPinned);
+      setIsFavorite(item.isFavorite);
+    }
   }, [item]);
 
   useEffect(() => {
@@ -114,6 +118,19 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
   function handleCancel() {
     setEditMode(false);
     setEditState(null);
+  }
+
+  async function handleToggleFavorite() {
+    if (!item) return;
+    setIsFavorite((prev) => !prev);
+    const result = await toggleItemFavorite(item.id);
+    if (!result.success) {
+      setIsFavorite((prev) => !prev);
+      toast.error(result.error);
+      return;
+    }
+    toast.success(result.data.isFavorite ? 'Added to favorites' : 'Removed from favorites');
+    router.refresh();
   }
 
   async function handleTogglePin() {
@@ -260,9 +277,10 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`gap-1.5 ${item.isFavorite ? 'text-amber-400' : ''}`}
+                  className={`gap-1.5 ${isFavorite ? 'text-amber-400' : ''}`}
+                  onClick={handleToggleFavorite}
                 >
-                  <Star className={`h-4 w-4 ${item.isFavorite ? 'fill-amber-400' : ''}`} />
+                  <Star className={`h-4 w-4 ${isFavorite ? 'fill-amber-400' : ''}`} />
                   Favorite
                 </Button>
                 <Button

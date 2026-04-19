@@ -263,6 +263,24 @@ export async function createItem(userId: string, data: CreateItemData): Promise<
   });
 }
 
+export async function toggleItemFavorite(
+  id: string,
+  userId: string
+): Promise<{ isFavorite: boolean } | null> {
+  const existing = await prisma.item.findFirst({
+    where: { id, userId },
+    select: { isFavorite: true },
+  });
+  if (!existing) return null;
+
+  const updated = await prisma.item.update({
+    where: { id },
+    data: { isFavorite: !existing.isFavorite },
+    select: { isFavorite: true },
+  });
+  return updated;
+}
+
 export async function toggleItemPin(
   id: string,
   userId: string
@@ -279,6 +297,30 @@ export async function toggleItemPin(
     select: { isPinned: true },
   });
   return updated;
+}
+
+export interface FavoriteItem {
+  id: string;
+  title: string;
+  updatedAt: Date;
+  itemType: {
+    name: string;
+    icon: string;
+    color: string;
+  };
+}
+
+export async function getFavoriteItems(userId: string): Promise<FavoriteItem[]> {
+  return prisma.item.findMany({
+    where: { userId, isFavorite: true },
+    orderBy: { updatedAt: 'desc' },
+    select: {
+      id: true,
+      title: true,
+      updatedAt: true,
+      itemType: { select: { name: true, icon: true, color: true } },
+    },
+  });
 }
 
 export async function getItemsByType(userId: string, typeName: string): Promise<DashboardItem[]> {

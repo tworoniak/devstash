@@ -73,6 +73,31 @@ export interface DashboardCollection {
   typeIcons: { icon: string; color: string }[];
 }
 
+export interface FavoriteCollection {
+  id: string;
+  name: string;
+  description: string | null;
+  updatedAt: Date;
+  itemCount: number;
+  accentColor: string;
+}
+
+export async function getFavoriteCollections(userId: string): Promise<FavoriteCollection[]> {
+  const collections = await prisma.collection.findMany({
+    where: { userId, isFavorite: true },
+    orderBy: { updatedAt: 'desc' },
+    include: collectionItemsInclude,
+  });
+  return collections.map((col) => ({
+    id: col.id,
+    name: col.name,
+    description: col.description,
+    updatedAt: col.updatedAt,
+    itemCount: col.items.length,
+    accentColor: dominantColor(col.items),
+  }));
+}
+
 export async function getDashboardCollections(userId: string): Promise<DashboardCollection[]> {
   const collections = await prisma.collection.findMany({
     where: { userId },
