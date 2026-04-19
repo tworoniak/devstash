@@ -1,27 +1,16 @@
-# Current Feature: File List View
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Replace `/items/files` grid layout with a single-column list (Google Drive/Dropbox style)
-- Each row displays: file icon (by extension), file name, file size, upload date, download button
-- Row hover highlight
-- Clicking a row opens the ItemDrawer
-- Download button triggers direct download (with stopPropagation so it doesn't open the drawer)
-- Responsive: stack info vertically on mobile
-
 ## Notes
-
-- Source spec: `context/features/file-display-spec.md`
-- Images page uses a gallery grid — this change is files only
-- The download route already exists at `/api/download/[id]`
-- File icon should vary by extension (e.g. PDF, ZIP, etc.)
 
 ## History
 
+- **File List View** - FileListRow component with extension-based icon (FileImage/FileCode/FileArchive/FileText/File), file name, size, upload date, hover-reveal download button (stopPropagation); files type page uses 1→2→3 column grid; gray left border accent + card border matching other item views; fileName/fileSize added to DashboardItem select; item drawer action bar changed to flex-wrap with Delete button moved inline (Completed)
 - **Image Gallery View** - ImageThumbnailCard component with aspect-video (16:9) thumbnails, object-cover, 5% hover zoom (300ms); images type page uses fixed 3-column gallery grid; fileUrl added to DashboardItem select; PRO badge repositioned inline next to label with count always on the right in sidebar; DevStash logo links to /dashboard when signed in, /sign-in when not (Completed)
 - **File Upload with Cloudflare R2** - Upload API route (/api/upload) with extension-based validation and size limits (5 MB images, 10 MB files); FileUpload component with drag-and-drop and XHR progress; Download proxy route (/api/download/[id]) with auth; R2 delete on item deletion; image preview and file info in ItemDrawer; download button in action bar; File/Image types in new item dialog; uses Cloudflare REST API (api.cloudflare.com) instead of S3 endpoint due to TLS handshake issues (Completed)
 - **Markdown Editor** - MarkdownEditor component with Write/Preview tabs, macOS window dots, copy button, react-markdown + remark-gfm for GFM support, custom .markdown-preview CSS class for dark theme styling; replaces Textarea for note/prompt in item-drawer (view and edit modes) and new-item-dialog; snippets/commands keep CodeEditor; readonly mode shows Preview tab only (Completed)
