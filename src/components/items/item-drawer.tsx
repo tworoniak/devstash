@@ -9,6 +9,16 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,7 +26,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { ICON_MAP } from '@/lib/constants/icon-map';
 import { formatDate } from '@/lib/utils';
-import { updateItem } from '@/actions/items';
+import { updateItem, deleteItem } from '@/actions/items';
 import { toast } from 'sonner';
 import type { ItemDetail } from '@/lib/db/items';
 
@@ -56,6 +66,8 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
   const [editMode, setEditMode] = useState(false);
   const [editState, setEditState] = useState<EditState | null>(null);
   const [saving, setSaving] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!itemId) {
@@ -121,6 +133,21 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
     router.refresh();
   }
 
+  async function handleDelete() {
+    if (!item) return;
+    setDeleting(true);
+    setDeleteConfirmOpen(false);
+    const result = await deleteItem(item.id);
+    setDeleting(false);
+    if (!result.success) {
+      toast.error(result.error);
+      return;
+    }
+    toast.success('Item deleted');
+    onClose();
+    router.refresh();
+  }
+
   function updateField(field: keyof EditState, value: string) {
     setEditState((prev) => prev ? { ...prev, [field]: value } : prev);
   }
@@ -134,6 +161,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
   const showUrl = typeName === 'link';
 
   return (
+    <>
     <Sheet open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
       <SheetContent side="right" className="sm:max-w-lg overflow-y-auto p-0" showCloseButton>
         {loading && <DrawerSkeleton />}
@@ -229,6 +257,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                   variant="ghost"
                   size="icon"
                   className="ml-auto text-muted-foreground hover:text-destructive"
+                  onClick={() => setDeleteConfirmOpen(true)}
                 >
                   <Trash2 className="h-4 w-4" />
                   <span className="sr-only">Delete</span>
@@ -437,6 +466,28 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
         )}
       </SheetContent>
     </Sheet>
+
+    <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete item?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to delete &ldquo;{item?.title}&rdquo;? This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDelete}
+            disabled={deleting}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            {deleting ? 'Deleting…' : 'Delete'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }
 
