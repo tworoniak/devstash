@@ -1,24 +1,16 @@
-# Current Feature: Image Gallery View
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Create an image thumbnail card to replace the current item card for images
-- Show an image grid/gallery with 3 columns
-- Display image thumbnail with 16:9 aspect ratio (`aspect-video`)
-- Use `object-cover` to fill the card (may crop edges)
-- Subtle hover zoom effect (5% scale with 300ms transition)
-
 ## Notes
-
-- Only applies to the images item type view
-- Thumbnail card replaces the regular ItemCard for image entries
 
 ## History
 
+- **Image Gallery View** - ImageThumbnailCard component with aspect-video (16:9) thumbnails, object-cover, 5% hover zoom (300ms); images type page uses fixed 3-column gallery grid; fileUrl added to DashboardItem select; PRO badge repositioned inline next to label with count always on the right in sidebar; DevStash logo links to /dashboard when signed in, /sign-in when not (Completed)
 - **File Upload with Cloudflare R2** - Upload API route (/api/upload) with extension-based validation and size limits (5 MB images, 10 MB files); FileUpload component with drag-and-drop and XHR progress; Download proxy route (/api/download/[id]) with auth; R2 delete on item deletion; image preview and file info in ItemDrawer; download button in action bar; File/Image types in new item dialog; uses Cloudflare REST API (api.cloudflare.com) instead of S3 endpoint due to TLS handshake issues (Completed)
 - **Markdown Editor** - MarkdownEditor component with Write/Preview tabs, macOS window dots, copy button, react-markdown + remark-gfm for GFM support, custom .markdown-preview CSS class for dark theme styling; replaces Textarea for note/prompt in item-drawer (view and edit modes) and new-item-dialog; snippets/commands keep CodeEditor; readonly mode shows Preview tab only (Completed)
 - **Code Editor** - Monaco Editor component (CodeEditor) with vs-dark theme, macOS window dots, language label and copy button in header, fluid height 80–400px, thin scrollbar; replaces Textarea for snippet/command in item-drawer (view and edit modes) and new-item-dialog; all other types keep Textarea (Completed)
