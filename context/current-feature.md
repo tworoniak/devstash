@@ -1,32 +1,16 @@
-# Current Feature: Item Drawer — Edit Mode
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Edit button in the item drawer action bar toggles the drawer into inline edit mode
-- In edit mode, action bar is replaced with Save and Cancel buttons
-- Cancel discards changes and returns to view mode
-- Save persists changes via server action, returns to view mode, refreshes drawer data, and shows toast
-- Editable for all types: Title (required), Description (optional), Tags (comma-separated)
-- Type-specific editable fields: Content textarea (snippet/prompt/command/note), Language input (snippet/command), URL input (link)
-- Item type, collections, and dates are display-only in edit mode
-- `updateItem` server action in `src/actions/items.ts` with Zod validation and `{ success, data, error }` return pattern
-- `updateItem` query in `src/lib/db/items.ts` — disconnects all existing tags, connect-or-create new ones, returns updated `ItemDetail`
-- After save, call `router.refresh()` so the underlying card list reflects changes
-- Save button disabled when title is empty
-
 ## Notes
-
-- No form library — controlled inputs with local state
-- Content textarea does not need to be a code editor (that comes later)
-- Zod schema validates: `title` (non-empty string, trimmed), `description` (string|null), `content` (string|null), `url` (valid URL|null), `language` (string|null), `tags` (array of trimmed non-empty strings)
-- Zod errors returned in `{ success: false, error }` for client display
 
 ## History
 
+- **Item Delete** - Delete button in item drawer opens shadcn AlertDialog confirmation, deleteItem server action with auth/ownership validation, Sonner toast on success/error, drawer closes and list refreshes via router.refresh() after deletion (Completed)
 - **Profile Page** - Profile page at /profile with user info, usage stats with item type breakdown, change password for email users, delete account with confirmation dialog, API endpoints for password change and account deletion (Completed)
 - **Forgot Password** - Forgot password link on sign-in, /forgot-password and /reset-password pages, API endpoints for token generation and password reset, password reset emails via Resend, reuses VerificationToken model with password-reset: prefix, 1-hour token expiry, edge case handling (Completed)
 - **Stats & Sidebar** - Real database data for stats cards (getDashboardStats), sidebar item types with counts (getSidebarItemTypes), favorite/recent collections with colored circle indicators (getSidebarFavoriteCollections/getSidebarRecentCollections), "View all collections" link, sidebarData fetched in dashboard layout and threaded through DashboardShell → TopBar/Sidebar as props, mobile sheet X overlap fixed with pt-10 (Completed)
@@ -57,3 +41,4 @@ In Progress
 - **Rate Limiting for Auth** - Upstash Redis rate limiting on auth endpoints, reusable rate-limit utility with sliding window algorithm, protects login/register/forgot-password/reset-password/resend-verification with configurable limits, 429 responses with Retry-After header, fail-open design (Completed)
 - **Items List View** - Dynamic route /items/[type] for type-filtered item lists, getItemsByType query with pinned-first sorting, responsive two-column grid using existing ItemCard, type validation with 404, empty state (Completed)
 - **Item Drawer** - Right-side slide-in drawer using shadcn Sheet, opens on ItemCard click, fetches full item detail via /api/items/[id] with auth, displays type icon/badges, action bar (Favorite/Pin/Copy/Edit/Delete), content, tags, collections, dates, loading skeleton, ItemDrawerProvider context in DashboardShell, getItemById query with ownership check, PinnedSection/RecentSection switched from demo user to auth session (Completed)
+- **Item Drawer Edit Mode** - Edit button toggles drawer to inline edit mode, action bar swaps to Save/Cancel, controlled inputs for title/description/content/language/URL/tags (type-gated), Zod-validated updateItem server action in src/actions/items.ts, updateItem query in src/lib/db/items.ts with full tag reconnect, toast on success/error, router.refresh() syncs card list (Completed)

@@ -2,8 +2,12 @@
 
 import { z } from 'zod';
 import { auth } from '@/auth';
-import { updateItem as updateItemQuery, deleteItem as deleteItemQuery } from '@/lib/db/items';
-import type { ItemDetail } from '@/lib/db/items';
+import {
+  updateItem as updateItemQuery,
+  deleteItem as deleteItemQuery,
+  createItem as createItemQuery,
+} from '@/lib/db/items';
+import type { ItemDetail, DashboardItem } from '@/lib/db/items';
 
 const UpdateItemSchema = z.object({
   title: z.string().trim().min(1, 'Title is required'),
@@ -54,6 +58,63 @@ export async function updateItem(
     return { success: true, data: updated };
   } catch {
     return { success: false, error: 'Failed to update item' };
+  }
+}
+
+const CREATE_ITEM_TYPES = ['snippet', 'prompt', 'command', 'note', 'link'] as const;
+
+const CreateItemSchema = z
+  .object({
+    typeName: z.enum(CREATE_ITEM_TYPES),
+    title: z.string().trim().min(1, 'Title is required'),
+    description: z.string().trim().nullable().optional(),
+    content: z.string().nullable().optional(),
+    url: z.string().trim().nullable().optional(),
+    language: z.string().trim().nullable().optional(),
+    tags: z.array(z.string().trim().min(1)).default([]),
+  })
+  .superRefine((data, ctx) => {
+    if (data.typeName === 'link') {
+      const parsed = z.string().url('Invalid URL').safeParse(data.url ?? '');
+      if (!parsed.success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'A valid URL is required for links',
+          path: ['url'],
+        });
+      }
+    }
+  });
+
+type CreateItemInput = z.infer<typeof CreateItemSchema>;
+
+export async function createItem(input: CreateItemInput): Promise<ActionResult<DashboardItem>> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  const parsed = CreateItemSchema.safeParse(input);
+  if (!parsed.success) {
+    const message = parsed.error.issues.map((i) => i.message).join(', ');
+    return { success: false, error: message };
+  }
+
+  const { typeName, title, description, content, url, language, tags } = parsed.data;
+
+  try {
+    const created = await createItemQuery(session.user.id, {
+      title,
+      description: description ?? null,
+      content: content ?? null,
+      url: url ?? null,
+      language: language ?? null,
+      tags,
+      typeName,
+    });
+    return { success: true, data: created };
+  } catch {
+    return { success: false, error: 'Failed to create item' };
   }
 }
 

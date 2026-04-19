@@ -13,9 +13,10 @@ interface TopBarProps {
   onSidebarToggle: () => void;
   sidebarData: SidebarData | null;
   user: SidebarUser | null;
+  onNewItem: () => void;
 }
 
-export function TopBar({ sidebarOpen, onSidebarToggle, sidebarData, user }: TopBarProps) {
+export function TopBar({ sidebarOpen, onSidebarToggle, sidebarData, user, onNewItem }: TopBarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -76,7 +77,7 @@ export function TopBar({ sidebarOpen, onSidebarToggle, sidebarData, user }: TopB
             <FolderPlus className='h-4 w-4' />
             New Collection
           </Button>
-          <Button size='sm' className='gap-1.5 text-sm'>
+          <Button size='sm' className='gap-1.5 text-sm' onClick={onNewItem}>
             <Plus className='h-4 w-4' />
             <span className='hidden sm:inline'>New Item</span>
           </Button>
