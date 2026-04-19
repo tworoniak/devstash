@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { TopBar } from '@/components/layout/top-bar';
 import { Sidebar } from '@/components/layout/sidebar';
 import { ItemDrawerProvider } from '@/components/items/item-drawer-provider';
+import { NewItemDialog } from '@/components/items/new-item-dialog';
 import type { SidebarData, SidebarUser } from '@/components/layout/sidebar';
 
 interface DashboardShellProps {
@@ -14,6 +15,7 @@ interface DashboardShellProps {
 
 export function DashboardShell({ children, sidebarData, user }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [newItemOpen, setNewItemOpen] = useState(false);
 
   return (
     <div className='flex flex-col h-screen overflow-hidden'>
@@ -22,6 +24,7 @@ export function DashboardShell({ children, sidebarData, user }: DashboardShellPr
         onSidebarToggle={() => setSidebarOpen(!sidebarOpen)}
         sidebarData={sidebarData}
         user={user}
+        onNewItem={() => setNewItemOpen(true)}
       />
       <div className='flex flex-1 overflow-hidden'>
         <Sidebar open={sidebarOpen} sidebarData={sidebarData} user={user} />
@@ -29,6 +32,7 @@ export function DashboardShell({ children, sidebarData, user }: DashboardShellPr
           <ItemDrawerProvider>{children}</ItemDrawerProvider>
         </main>
       </div>
+      <NewItemDialog open={newItemOpen} onOpenChange={setNewItemOpen} />
     </div>
   );
 }

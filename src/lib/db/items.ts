@@ -203,6 +203,47 @@ export async function deleteItem(id: string, userId: string): Promise<boolean> {
   return true;
 }
 
+export interface CreateItemData {
+  title: string;
+  description: string | null;
+  content: string | null;
+  url: string | null;
+  language: string | null;
+  tags: string[];
+  typeName: string;
+}
+
+export async function createItem(userId: string, data: CreateItemData): Promise<DashboardItem> {
+  const itemType = await prisma.itemType.findFirst({
+    where: { name: data.typeName, isSystem: true },
+    select: { id: true },
+  });
+
+  if (!itemType) throw new Error(`Item type not found: ${data.typeName}`);
+
+  const contentType = data.typeName === 'link' ? 'URL' : 'TEXT';
+
+  return prisma.item.create({
+    data: {
+      title: data.title,
+      description: data.description,
+      content: data.content,
+      url: data.url,
+      language: data.language,
+      contentType,
+      userId,
+      itemTypeId: itemType.id,
+      tags: {
+        connectOrCreate: data.tags.map((name) => ({
+          where: { name },
+          create: { name },
+        })),
+      },
+    },
+    select: itemSelect,
+  });
+}
+
 export async function getItemsByType(userId: string, typeName: string): Promise<DashboardItem[]> {
   return prisma.item.findMany({
     where: {
