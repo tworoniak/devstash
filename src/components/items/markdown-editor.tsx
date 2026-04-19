@@ -119,7 +119,7 @@ export function MarkdownEditor({ value, readOnly = false, onChange }: MarkdownEd
           />
         ) : (
           <div
-            className="markdown-preview h-full overflow-y-auto p-3"
+            className="markdown-preview prose prose-sm max-w-none h-full overflow-y-auto p-3"
             style={{ height: contentHeight }}
           >
             {value ? (

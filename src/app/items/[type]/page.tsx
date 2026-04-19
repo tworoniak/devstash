@@ -50,7 +50,7 @@ export default async function ItemsTypePage({ params }: PageProps) {
           <p className='text-muted-foreground text-sm'>No {slug} yet.</p>
         </div>
       ) : (
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3'>
           {items.map((item) => (
             <ItemRow key={item.id} item={item} />
           ))}
