@@ -1,12 +1,24 @@
-# Current Feature
+# Current Feature: Pinned Items
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- `toggleItemPin` server action created and wired up
+- Pin button in ItemDrawer is clickable and toggles `isPinned` on the item
+- Optimistic UI so the button state updates instantly without waiting for the server
+- Toast notification on success/error
+- Pinned items sort to the top of `/items/[type]` listings
+- Pinned items appear in the dashboard Pinned Items section
+- Pin icon on ItemCard remains a static read-only indicator (no click handler)
+
 ## Notes
+
+- Follow the Favorite Button pattern for optimistic state + server action wiring
+- Items only — no pinning for collections
+- `isPinned` field already exists on the Item model
 
 ## History
 

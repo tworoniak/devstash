@@ -263,6 +263,24 @@ export async function createItem(userId: string, data: CreateItemData): Promise<
   });
 }
 
+export async function toggleItemPin(
+  id: string,
+  userId: string
+): Promise<{ isPinned: boolean } | null> {
+  const existing = await prisma.item.findFirst({
+    where: { id, userId },
+    select: { isPinned: true },
+  });
+  if (!existing) return null;
+
+  const updated = await prisma.item.update({
+    where: { id },
+    data: { isPinned: !existing.isPinned },
+    select: { isPinned: true },
+  });
+  return updated;
+}
+
 export async function getItemsByType(userId: string, typeName: string): Promise<DashboardItem[]> {
   return prisma.item.findMany({
     where: {

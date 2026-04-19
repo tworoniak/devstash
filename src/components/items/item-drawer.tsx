@@ -27,7 +27,7 @@ import { Label } from '@/components/ui/label';
 import { ICON_MAP } from '@/lib/constants/icon-map';
 import { buttonVariants } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils';
-import { updateItem, deleteItem } from '@/actions/items';
+import { updateItem, deleteItem, toggleItemPin } from '@/actions/items';
 import { toast } from 'sonner';
 import { CodeEditor } from '@/components/items/code-editor';
 import { MarkdownEditor } from '@/components/items/markdown-editor';
@@ -77,6 +77,11 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
   const [saving, setSaving] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [isPinned, setIsPinned] = useState(false);
+
+  useEffect(() => {
+    if (item) setIsPinned(item.isPinned);
+  }, [item]);
 
   useEffect(() => {
     if (!itemId) {
@@ -109,6 +114,19 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
   function handleCancel() {
     setEditMode(false);
     setEditState(null);
+  }
+
+  async function handleTogglePin() {
+    if (!item) return;
+    setIsPinned((prev) => !prev);
+    const result = await toggleItemPin(item.id);
+    if (!result.success) {
+      setIsPinned((prev) => !prev);
+      toast.error(result.error);
+      return;
+    }
+    toast.success(result.data.isPinned ? 'Item pinned' : 'Item unpinned');
+    router.refresh();
   }
 
   async function handleSave() {
@@ -250,9 +268,10 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`gap-1.5 ${item.isPinned ? 'text-blue-400' : ''}`}
+                  className={`gap-1.5 ${isPinned ? 'text-blue-400' : ''}`}
+                  onClick={handleTogglePin}
                 >
-                  <Pin className={`h-4 w-4 ${item.isPinned ? 'fill-blue-400' : ''}`} />
+                  <Pin className={`h-4 w-4 ${isPinned ? 'fill-blue-400' : ''}`} />
                   Pin
                 </Button>
                 <Button variant="ghost" size="sm" className="gap-1.5">
