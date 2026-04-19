@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { getItemsByType } from '@/lib/db/items';
 import { ItemRow } from '@/components/dashboard/item-row';
 import { ImageThumbnailCard } from '@/components/items/image-thumbnail-card';
+import { FileListRow } from '@/components/items/file-list-row';
 
 // Valid plural slugs → singular type names stored in DB
 const SLUG_TO_TYPE: Record<string, string> = {
@@ -54,6 +55,12 @@ export default async function ItemsTypePage({ params }: PageProps) {
         <div className='grid grid-cols-3 gap-3'>
           {items.map((item) => (
             <ImageThumbnailCard key={item.id} item={item} />
+          ))}
+        </div>
+      ) : slug === 'files' ? (
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3'>
+          {items.map((item) => (
+            <FileListRow key={item.id} item={item} />
           ))}
         </div>
       ) : (
