@@ -1,34 +1,16 @@
-# Current Feature: Homepage Mockup
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Create a standalone marketing homepage at `prototypes/homepage/` (index.html, styles.css, script.js)
-- Hero section with animated "chaos to order" concept: floating icons (chaos) → pulsing arrow → dashboard preview
-- Chaos icons drift, bounce off walls, and repel from mouse cursor via requestAnimationFrame
-- Fixed nav with logo, Features/Pricing links, Sign In/Get Started buttons; becomes more opaque on scroll
-- Features section: 6 cards (Code Snippets, AI Prompts, Instant Search, Commands, Files & Docs, Collections) with item type accent colors
-- AI section: Pro badge + feature checklist on left, code editor mockup with AI tag demo on right
-- Pricing section: Free vs Pro cards, Pro highlighted with "Most Popular"; yearly toggle ($72/yr option)
-- CTA and Footer sections
-- Scroll-triggered fade-in animations
-- Fully responsive: chaos/arrow/dashboard stacks vertically on mobile, arrow rotates 90°
-
 ## Notes
-
-- Output: `prototypes/homepage/index.html`, `styles.css`, `script.js` — standalone HTML/CSS/JS (no framework)
-- Reference screenshots: `context/screenshots/homepage-full-visible.png` and `context/screenshots/homepage-mobile.png`
-- Dark theme; item type accent colors:
-  - Snippet: #3b82f6 (Blue), Prompt: #f59e0b (Amber), Command: #06b6d4 (Cyan)
-  - Note: #22c55e (Green), File: #64748b (Slate), Image: #ec4899 (Pink), URL: #6366f1 (Indigo)
-- Chaos icons: Notion, GitHub, Slack, VS Code logos + browser tabs, terminal, text file, bookmark icons
-- Dashboard preview (right side of hero): sidebar with nav items + grid of item cards with colored top borders
 
 ## History
 
+- **Homepage Mockup** - Standalone marketing prototype at prototypes/homepage/ (index.html, styles.css, script.js); hero with animated chaos-to-order visual (8 floating icons bounce off walls + mouse repel via requestAnimationFrame), pulsing arrow, mini dashboard preview with colored item cards; fixed nav turns frosted glass on scroll, mobile hamburger menu; 6-card features grid with type accent colors + hover top-border reveal; AI section with code editor mockup and AI tag demo; pricing with monthly/yearly toggle ($8/mo → $6/mo billed $72/yr); CTA and footer; scroll fade-ins via IntersectionObserver; responsive mobile stack with 90° arrow rotation (Completed)
 - **File List View** - FileListRow component with extension-based icon (FileImage/FileCode/FileArchive/FileText/File), file name, size, upload date, hover-reveal download button (stopPropagation); files type page uses 1→2→3 column grid; gray left border accent + card border matching other item views; fileName/fileSize added to DashboardItem select; item drawer action bar changed to flex-wrap with Delete button moved inline (Completed)
 - **Image Gallery View** - ImageThumbnailCard component with aspect-video (16:9) thumbnails, object-cover, 5% hover zoom (300ms); images type page uses fixed 3-column gallery grid; fileUrl added to DashboardItem select; PRO badge repositioned inline next to label with count always on the right in sidebar; DevStash logo links to /dashboard when signed in, /sign-in when not (Completed)
 - **File Upload with Cloudflare R2** - Upload API route (/api/upload) with extension-based validation and size limits (5 MB images, 10 MB files); FileUpload component with drag-and-drop and XHR progress; Download proxy route (/api/download/[id]) with auth; R2 delete on item deletion; image preview and file info in ItemDrawer; download button in action bar; File/Image types in new item dialog; uses Cloudflare REST API (api.cloudflare.com) instead of S3 endpoint due to TLS handshake issues (Completed)
