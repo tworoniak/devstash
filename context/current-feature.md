@@ -1,30 +1,16 @@
-# Current Feature: Markdown Editor
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Create `MarkdownEditor` component with tabbed Write/Preview interface
-- Replace Textarea with `MarkdownEditor` for **notes** and **prompts** only (snippets/commands keep `CodeEditor`)
-- Use `react-markdown` + `remark-gfm` for GitHub Flavored Markdown rendering
-- Match existing dark theme styling (`bg-[#1e1e1e]` container, `bg-[#2d2d2d]` header)
-- Copy button in header (same style as `CodeEditor`)
-- Readonly mode shows Preview tab only; edit mode defaults to Write tab with Preview available
-- Full markdown styling: headings, code blocks, inline code, lists, blockquotes, links, tables
-- Custom CSS class `.markdown-preview` for reliable dark mode styling
-- Fluid height with max 400px (matching `CodeEditor`)
-- Integrate into `NewItemDialog` and `ItemDrawer` (view and edit modes) for note and prompt types
-
 ## Notes
-
-- Spec source: `context/features/markdown-editor-spec.md`
-- Do not touch `CodeEditor` — it stays for snippets and commands
-- Use a custom CSS class rather than Tailwind prose plugin for reliable dark mode styling
 
 ## History
 
+- **Markdown Editor** - MarkdownEditor component with Write/Preview tabs, macOS window dots, copy button, react-markdown + remark-gfm for GFM support, custom .markdown-preview CSS class for dark theme styling; replaces Textarea for note/prompt in item-drawer (view and edit modes) and new-item-dialog; snippets/commands keep CodeEditor; readonly mode shows Preview tab only (Completed)
 - **Code Editor** - Monaco Editor component (CodeEditor) with vs-dark theme, macOS window dots, language label and copy button in header, fluid height 80–400px, thin scrollbar; replaces Textarea for snippet/command in item-drawer (view and edit modes) and new-item-dialog; all other types keep Textarea (Completed)
 - **Item Create** - New Item button in top bar opens shadcn Dialog, type selector (snippet/prompt/command/note/link), dynamic fields per type (content, language, URL), createItem server action with Zod validation, createItem db query in lib/db/items.ts, toast on success, modal close and list refresh via router.refresh() (Completed)
 - **Item Delete** - Delete button in item drawer opens shadcn AlertDialog confirmation, deleteItem server action with auth/ownership validation, Sonner toast on success/error, drawer closes and list refreshes via router.refresh() after deletion (Completed)
