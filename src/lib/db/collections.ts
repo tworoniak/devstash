@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
+import { DASHBOARD_COLLECTIONS_LIMIT, COLLECTIONS_PER_PAGE } from '@/lib/constants/pagination';
+import { itemSelect, type DashboardItem } from '@/lib/db/items';
 
-const DASHBOARD_COLLECTIONS_LIMIT = 6;
 const SIDEBAR_COLLECTIONS_LIMIT = 5;
 
 export interface SidebarCollection {
@@ -143,4 +144,63 @@ export async function getDashboardCollections(userId: string): Promise<Dashboard
       typeIcons,
     };
   });
+}
+
+export interface CollectionDetail {
+  id: string;
+  name: string;
+  description: string | null;
+  isFavorite: boolean;
+  accentColor: string;
+}
+
+export async function getCollectionWithItems(
+  id: string,
+  userId: string,
+  page: number = 1
+): Promise<{ collection: CollectionDetail | null; items: DashboardItem[]; total: number }> {
+  const collection = await prisma.collection.findFirst({
+    where: { id, userId },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      isFavorite: true,
+      items: {
+        include: {
+          item: { include: { itemType: { select: { id: true, color: true } } } },
+        },
+      },
+    },
+  });
+
+  if (!collection) return { collection: null, items: [], total: 0 };
+
+  const accentColor = dominantColor(collection.items);
+
+  const skip = (page - 1) * COLLECTIONS_PER_PAGE;
+  const where = { collectionId: id, item: { userId } };
+
+  const [itemCollections, total] = await Promise.all([
+    prisma.itemCollection.findMany({
+      where,
+      orderBy: [{ item: { isPinned: 'desc' } }, { addedAt: 'desc' }],
+      skip,
+      take: COLLECTIONS_PER_PAGE,
+      select: { item: { select: itemSelect } },
+    }),
+    prisma.itemCollection.count({ where }),
+  ]);
+
+  return {
+    collection: {
+      id: collection.id,
+      name: collection.name,
+      description: collection.description,
+      isFavorite: collection.isFavorite,
+      accentColor,
+    },
+    items: itemCollections.map((ic) => ic.item),
+    total,
+  };
 }
