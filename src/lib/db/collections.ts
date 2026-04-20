@@ -2,6 +2,19 @@ import { prisma } from '@/lib/prisma';
 import { DASHBOARD_COLLECTIONS_LIMIT, COLLECTIONS_PER_PAGE } from '@/lib/constants/pagination';
 import { itemSelect, type DashboardItem } from '@/lib/db/items';
 
+export interface UserCollection {
+  id: string;
+  name: string;
+}
+
+export async function getUserCollections(userId: string): Promise<UserCollection[]> {
+  return prisma.collection.findMany({
+    where: { userId },
+    orderBy: { name: 'asc' },
+    select: { id: true, name: true },
+  });
+}
+
 export interface CreatedCollection {
   id: string;
   name: string;

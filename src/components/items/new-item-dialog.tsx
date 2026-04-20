@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Dialog,
@@ -21,11 +21,14 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { createItem } from '@/actions/items';
+import { getUserCollections } from '@/actions/collections';
 import { toast } from 'sonner';
 import { CodeEditor } from '@/components/items/code-editor';
 import { MarkdownEditor } from '@/components/items/markdown-editor';
 import { FileUpload } from '@/components/items/file-upload';
+import { CollectionSelector } from '@/components/shared/collection-selector';
 import type { UploadResult } from '@/components/items/file-upload';
+import type { UserCollection } from '@/lib/db/collections';
 
 const ITEM_TYPES = [
   { value: 'snippet', label: 'Snippet' },
@@ -76,6 +79,15 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
   const router = useRouter();
   const [form, setForm] = useState<FormState>(defaultForm);
   const [saving, setSaving] = useState(false);
+  const [collections, setCollections] = useState<UserCollection[]>([]);
+  const [selectedCollectionIds, setSelectedCollectionIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!open) return;
+    getUserCollections().then((result) => {
+      if (result.success) setCollections(result.data);
+    });
+  }, [open]);
 
   function setField<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -89,6 +101,7 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
   function handleClose() {
     onOpenChange(false);
     setForm(defaultForm());
+    setSelectedCollectionIds([]);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -111,6 +124,7 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
       fileKey: form.uploadResult?.key ?? null,
       fileName: form.uploadResult?.fileName ?? null,
       fileSize: form.uploadResult?.fileSize ?? null,
+      collectionIds: selectedCollectionIds,
     });
 
     setSaving(false);
@@ -275,6 +289,18 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
               className="text-sm"
             />
             <p className="text-xs text-muted-foreground">Comma-separated</p>
+          </div>
+
+          {/* Collections */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Collections
+            </Label>
+            <CollectionSelector
+              collections={collections}
+              selected={selectedCollectionIds}
+              onChange={setSelectedCollectionIds}
+            />
           </div>
 
           <DialogFooter className="pt-2">

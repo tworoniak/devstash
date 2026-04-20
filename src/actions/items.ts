@@ -19,6 +19,7 @@ const UpdateItemSchema = z.object({
   url: z.string().trim().url('Invalid URL').nullable().optional(),
   language: z.string().trim().nullable().optional(),
   tags: z.array(z.string().trim().min(1)).default([]),
+  collectionIds: z.array(z.string()).optional(),
 });
 
 type UpdateItemInput = z.infer<typeof UpdateItemSchema>;
@@ -42,7 +43,7 @@ export async function updateItem(
     return { success: false, error: message };
   }
 
-  const { title, description, content, url, language, tags } = parsed.data;
+  const { title, description, content, url, language, tags, collectionIds } = parsed.data;
 
   try {
     const updated = await updateItemQuery(itemId, session.user.id, {
@@ -52,6 +53,7 @@ export async function updateItem(
       url: url ?? null,
       language: language ?? null,
       tags,
+      collectionIds,
     });
 
     if (!updated) {
@@ -78,6 +80,7 @@ const CreateItemSchema = z
     fileKey: z.string().nullable().optional(),
     fileName: z.string().nullable().optional(),
     fileSize: z.number().nullable().optional(),
+    collectionIds: z.array(z.string()).optional(),
   })
   .superRefine((data, ctx) => {
     if (data.typeName === 'link') {
@@ -115,7 +118,7 @@ export async function createItem(input: CreateItemInput): Promise<ActionResult<D
     return { success: false, error: message };
   }
 
-  const { typeName, title, description, content, url, language, tags, fileKey, fileName, fileSize } =
+  const { typeName, title, description, content, url, language, tags, fileKey, fileName, fileSize, collectionIds } =
     parsed.data;
 
   try {
@@ -130,6 +133,7 @@ export async function createItem(input: CreateItemInput): Promise<ActionResult<D
       fileKey: fileKey ?? null,
       fileName: fileName ?? null,
       fileSize: fileSize ?? null,
+      collectionIds,
     });
     return { success: true, data: created };
   } catch {

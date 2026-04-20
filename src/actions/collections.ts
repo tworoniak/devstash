@@ -2,8 +2,11 @@
 
 import { z } from 'zod';
 import { auth } from '@/auth';
-import { createCollection as createCollectionQuery } from '@/lib/db/collections';
-import type { CreatedCollection } from '@/lib/db/collections';
+import {
+  createCollection as createCollectionQuery,
+  getUserCollections as getUserCollectionsQuery,
+} from '@/lib/db/collections';
+import type { CreatedCollection, UserCollection } from '@/lib/db/collections';
 
 const CreateCollectionSchema = z.object({
   name: z.string().trim().min(1, 'Name is required'),
@@ -36,5 +39,19 @@ export async function createCollection(
     return { success: true, data: created };
   } catch {
     return { success: false, error: 'Failed to create collection' };
+  }
+}
+
+export async function getUserCollections(): Promise<ActionResult<UserCollection[]>> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    const collections = await getUserCollectionsQuery(session.user.id);
+    return { success: true, data: collections };
+  } catch {
+    return { success: false, error: 'Failed to fetch collections' };
   }
 }

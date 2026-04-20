@@ -148,6 +148,7 @@ export interface UpdateItemData {
   url: string | null;
   language: string | null;
   tags: string[];
+  collectionIds?: string[];
 }
 
 export async function updateItem(
@@ -173,6 +174,12 @@ export async function updateItem(
           create: { name },
         })),
       },
+      ...(data.collectionIds !== undefined && {
+        collections: {
+          deleteMany: {},
+          create: data.collectionIds.map((collectionId) => ({ collectionId })),
+        },
+      }),
     },
     select: {
       id: true,
@@ -225,6 +232,7 @@ export interface CreateItemData {
   fileKey?: string | null;
   fileName?: string | null;
   fileSize?: number | null;
+  collectionIds?: string[];
 }
 
 export async function createItem(userId: string, data: CreateItemData): Promise<DashboardItem> {
@@ -257,6 +265,11 @@ export async function createItem(userId: string, data: CreateItemData): Promise<
           create: { name },
         })),
       },
+      ...(data.collectionIds?.length && {
+        collections: {
+          create: data.collectionIds.map((collectionId) => ({ collectionId })),
+        },
+      }),
     },
     select: itemSelect,
   });

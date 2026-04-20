@@ -28,10 +28,13 @@ import { ICON_MAP } from '@/lib/constants/icon-map';
 import { buttonVariants } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils';
 import { updateItem, deleteItem, toggleItemPin, toggleItemFavorite } from '@/actions/items';
+import { getUserCollections } from '@/actions/collections';
 import { toast } from 'sonner';
 import { CodeEditor } from '@/components/items/code-editor';
 import { MarkdownEditor } from '@/components/items/markdown-editor';
+import { CollectionSelector } from '@/components/shared/collection-selector';
 import type { ItemDetail } from '@/lib/db/items';
+import type { UserCollection } from '@/lib/db/collections';
 
 const TEXT_CONTENT_TYPES = new Set(['snippet', 'prompt', 'command', 'note']);
 
@@ -54,6 +57,7 @@ interface EditState {
   url: string;
   language: string;
   tags: string;
+  collectionIds: string[];
 }
 
 function itemToEditState(item: ItemDetail): EditState {
@@ -64,6 +68,7 @@ function itemToEditState(item: ItemDetail): EditState {
     url: item.url ?? '',
     language: item.language ?? '',
     tags: item.tags.map((t) => t.name).join(', '),
+    collectionIds: item.collections.map(({ collection }) => collection.id),
   };
 }
 
@@ -79,6 +84,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
   const [deleting, setDeleting] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [allCollections, setAllCollections] = useState<UserCollection[]>([]);
 
   useEffect(() => {
     if (item) {
@@ -113,6 +119,9 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
     if (!item) return;
     setEditState(itemToEditState(item));
     setEditMode(true);
+    getUserCollections().then((result) => {
+      if (result.success) setAllCollections(result.data);
+    });
   }
 
   function handleCancel() {
@@ -161,6 +170,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
       url: editState.url || null,
       language: editState.language || null,
       tags,
+      collectionIds: editState.collectionIds,
     });
 
     setSaving(false);
@@ -192,7 +202,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
     router.refresh();
   }
 
-  function updateField(field: keyof EditState, value: string) {
+  function updateField(field: keyof EditState, value: string | string[]) {
     setEditState((prev) => prev ? { ...prev, [field]: value } : prev);
   }
 
@@ -405,21 +415,16 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                     <p className="text-xs text-muted-foreground">Comma-separated</p>
                   </div>
 
-                  {/* Non-editable: collections + dates */}
-                  {item.collections.length > 0 && (
-                    <div>
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
-                        Collections
-                      </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {item.collections.map(({ collection }) => (
-                          <Badge key={collection.id} variant="outline" className="text-xs">
-                            {collection.name}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      Collections
+                    </Label>
+                    <CollectionSelector
+                      collections={allCollections}
+                      selected={editState.collectionIds}
+                      onChange={(ids) => updateField('collectionIds', ids)}
+                    />
+                  </div>
 
                   <div>
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
