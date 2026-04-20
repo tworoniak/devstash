@@ -5,6 +5,7 @@ import { TopBar } from '@/components/layout/top-bar';
 import { Sidebar } from '@/components/layout/sidebar';
 import { ItemDrawerProvider } from '@/components/items/item-drawer-provider';
 import { NewItemDialog } from '@/components/items/new-item-dialog';
+import { NewCollectionDialog } from '@/components/collections/new-collection-dialog';
 import type { SidebarData, SidebarUser } from '@/components/layout/sidebar';
 
 interface DashboardShellProps {
@@ -16,6 +17,7 @@ interface DashboardShellProps {
 export function DashboardShell({ children, sidebarData, user }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [newItemOpen, setNewItemOpen] = useState(false);
+  const [newCollectionOpen, setNewCollectionOpen] = useState(false);
 
   return (
     <div className='flex flex-col h-screen overflow-hidden'>
@@ -25,6 +27,7 @@ export function DashboardShell({ children, sidebarData, user }: DashboardShellPr
         sidebarData={sidebarData}
         user={user}
         onNewItem={() => setNewItemOpen(true)}
+        onNewCollection={() => setNewCollectionOpen(true)}
       />
       <div className='flex flex-1 overflow-hidden'>
         <Sidebar open={sidebarOpen} sidebarData={sidebarData} user={user} />
@@ -33,6 +36,7 @@ export function DashboardShell({ children, sidebarData, user }: DashboardShellPr
         </main>
       </div>
       <NewItemDialog open={newItemOpen} onOpenChange={setNewItemOpen} />
+      <NewCollectionDialog open={newCollectionOpen} onOpenChange={setNewCollectionOpen} />
     </div>
   );
 }

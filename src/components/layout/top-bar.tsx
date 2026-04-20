@@ -15,9 +15,10 @@ interface TopBarProps {
   sidebarData: SidebarData | null;
   user: SidebarUser | null;
   onNewItem: () => void;
+  onNewCollection: () => void;
 }
 
-export function TopBar({ sidebarOpen, onSidebarToggle, sidebarData, user, onNewItem }: TopBarProps) {
+export function TopBar({ sidebarOpen, onSidebarToggle, sidebarData, user, onNewItem, onNewCollection }: TopBarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -77,6 +78,7 @@ export function TopBar({ sidebarOpen, onSidebarToggle, sidebarData, user, onNewI
             variant='outline'
             size='sm'
             className='gap-1.5 text-sm hidden sm:flex border-border'
+            onClick={onNewCollection}
           >
             <FolderPlus className='h-4 w-4' />
             New Collection

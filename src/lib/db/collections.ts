@@ -2,6 +2,26 @@ import { prisma } from '@/lib/prisma';
 import { DASHBOARD_COLLECTIONS_LIMIT, COLLECTIONS_PER_PAGE } from '@/lib/constants/pagination';
 import { itemSelect, type DashboardItem } from '@/lib/db/items';
 
+export interface CreatedCollection {
+  id: string;
+  name: string;
+  description: string | null;
+}
+
+export async function createCollection(
+  userId: string,
+  data: { name: string; description?: string | null }
+): Promise<CreatedCollection> {
+  return prisma.collection.create({
+    data: {
+      name: data.name,
+      description: data.description ?? null,
+      userId,
+    },
+    select: { id: true, name: true, description: true },
+  });
+}
+
 const SIDEBAR_COLLECTIONS_LIMIT = 5;
 
 export interface SidebarCollection {

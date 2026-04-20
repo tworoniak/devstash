@@ -1,12 +1,26 @@
-# Current Feature
+# Current Feature: Collection Create
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- "New Collection" button in the top bar opens a modal dialog
+- Modal has fields: name (required) and description (optional)
+- On submit, creates a collection scoped to the authenticated user
+- Toast notification on success or failure
+- Collection list updates immediately after creation (no page reload required)
+- Follows same patterns as item creation: `lib/db` function, server action, Zod validation
+
 ## Notes
+
+- Use `createCollection` db query in `src/lib/db/collections.ts`
+- Server action in `src/actions/collections.ts` with auth guard and Zod validation
+- Modal component: `src/components/collections/new-collection-dialog.tsx`
+- Wire button in TopBar (same location as the "New Item" button)
+- After success: `router.refresh()` to sync sidebar collection counts and dashboard collections list
+- Return `{ success, data, error }` pattern from the server action
 
 ## History
 
