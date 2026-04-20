@@ -1,29 +1,16 @@
-# Current Feature: Collection Create
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- "New Collection" button in the top bar opens a modal dialog
-- Modal has fields: name (required) and description (optional)
-- On submit, creates a collection scoped to the authenticated user
-- Toast notification on success or failure
-- Collection list updates immediately after creation (no page reload required)
-- Follows same patterns as item creation: `lib/db` function, server action, Zod validation
-
 ## Notes
-
-- Use `createCollection` db query in `src/lib/db/collections.ts`
-- Server action in `src/actions/collections.ts` with auth guard and Zod validation
-- Modal component: `src/components/collections/new-collection-dialog.tsx`
-- Wire button in TopBar (same location as the "New Item" button)
-- After success: `router.refresh()` to sync sidebar collection counts and dashboard collections list
-- Return `{ success, data, error }` pattern from the server action
 
 ## History
 
+- **Collection Create** - "New Collection" button in TopBar opens a modal dialog; fields: name (required) + description (optional); createCollection db query in src/lib/db/collections.ts; createCollection server action in src/actions/collections.ts with auth guard and Zod validation; NewCollectionDialog component at src/components/collections/new-collection-dialog.tsx; onNewCollection prop added to TopBar and wired in DashboardShell alongside NewItemDialog; toast on success/failure; router.refresh() syncs sidebar and dashboard (Completed)
 - **Pagination** - Pagination on /items/[type] and /collections/[id] pages; ITEMS_PER_PAGE=21, COLLECTIONS_PER_PAGE=21 constants in src/lib/constants/pagination.ts; getItemsByType updated to paginate with skip/take (returns { items, total }); getCollectionWithItems added for paginated collection detail with ownership check; Pagination component (src/components/shared/pagination.tsx) with numbered page links, prev/next greyed at boundaries, ellipsis for > 7 pages, uses ?page=N URL params; /collections/[id] page created with collection header, mixed item type rendering, and Pagination; /collections/layout.tsx added with auth + sidebar shell (Completed)
 - **Homepage** - Converted prototypes/homepage/ to the real Next.js homepage at src/app/page.tsx; 10 components under src/components/homepage/: Navbar (fixed, scroll frosted-glass bg, mobile hamburger), HeroSection with ChaosAnimation (8 icons bounce off walls + mouse repulsion via rAF, ref-based state, cleanup on unmount) and DashboardPreview (static mini-sidebar + 2-col card grid), FeaturesSection (6 cards, hover top-border accent reveal), AISection (split layout, code editor mockup with AI tags), PricingSection (monthly/yearly toggle, $8→$6/mo billed $72/yr), CTASection, Footer (Product/Resources/Company link columns, dynamic year); ScrollFadeIn wrapper (IntersectionObserver, opacity 0→1 + translateY 24px→0); scroll-smooth + arrowPulse keyframe added to globals.css; all nav links wired (sign-in, register, #features, #pricing anchors); fully responsive (Completed)
 - **Favorites Page** - /favorites route (auth-protected) with compact monospace list; separate Items and Collections sections with counts; FavoriteItemRow opens ItemDrawer on click; FavoriteCollectionRow links to /collections/[id]; empty state; sorted by updatedAt desc; toggleItemFavorite db query with ownership check; toggleItemFavorite server action with auth guard; Favorite button in ItemDrawer wired with optimistic local state (syncs on item load, flips instantly, reverts on error), toast on success/error, router.refresh(); "View all favorites" link added to sidebar under Collections > Favorites sub-section; TopBar star button removed (Completed)
