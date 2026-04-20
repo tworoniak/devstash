@@ -57,6 +57,31 @@ interface FormState {
   uploadResult: UploadResult | null;
 }
 
+function FormField({
+  label,
+  htmlFor,
+  required,
+  hint,
+  children,
+}: {
+  label: string;
+  htmlFor?: string;
+  required?: boolean;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor={htmlFor} className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+        {label}
+        {required && <span className="text-destructive"> *</span>}
+      </Label>
+      {children}
+      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+    </div>
+  );
+}
+
 function defaultForm(): FormState {
   return {
     typeName: 'snippet',
@@ -157,11 +182,7 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 py-1">
-          {/* Type selector */}
-          <div className="space-y-1.5">
-            <Label htmlFor="item-type" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Type
-            </Label>
+          <FormField label="Type" htmlFor="item-type">
             <Select value={form.typeName} onValueChange={handleTypeChange}>
               <SelectTrigger id="item-type" className="w-full">
                 <SelectValue />
@@ -174,13 +195,9 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
                 ))}
               </SelectContent>
             </Select>
-          </div>
+          </FormField>
 
-          {/* Title */}
-          <div className="space-y-1.5">
-            <Label htmlFor="item-title" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Title <span className="text-destructive">*</span>
-            </Label>
+          <FormField label="Title" htmlFor="item-title" required>
             <Input
               id="item-title"
               value={form.title}
@@ -189,13 +206,9 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
               autoFocus
               className="text-sm"
             />
-          </div>
+          </FormField>
 
-          {/* Description */}
-          <div className="space-y-1.5">
-            <Label htmlFor="item-description" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Description
-            </Label>
+          <FormField label="Description" htmlFor="item-description">
             <Textarea
               id="item-description"
               value={form.description}
@@ -204,14 +217,10 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
               rows={2}
               className="text-sm resize-none"
             />
-          </div>
+          </FormField>
 
-          {/* URL — link only */}
           {showUrl && (
-            <div className="space-y-1.5">
-              <Label htmlFor="item-url" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                URL <span className="text-destructive">*</span>
-              </Label>
+            <FormField label="URL" htmlFor="item-url" required>
               <Input
                 id="item-url"
                 value={form.url}
@@ -220,31 +229,22 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
                 type="url"
                 className="text-sm"
               />
-            </div>
+            </FormField>
           )}
 
-          {/* File upload — file/image only */}
           {showFileUpload && (
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                {form.typeName === 'image' ? 'Image' : 'File'}{' '}
-                <span className="text-destructive">*</span>
-              </Label>
+            <FormField label={form.typeName === 'image' ? 'Image' : 'File'} required>
               <FileUpload
                 itemType={form.typeName as 'file' | 'image'}
                 uploaded={form.uploadResult}
                 onUpload={(result) => setField('uploadResult', result)}
                 onRemove={() => setField('uploadResult', null)}
               />
-            </div>
+            </FormField>
           )}
 
-          {/* Content — snippet, prompt, command, note */}
           {showContent && (
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Content
-              </Label>
+            <FormField label="Content">
               {showLanguage ? (
                 <CodeEditor
                   value={form.content}
@@ -257,15 +257,11 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
                   onChange={(v) => setField('content', v)}
                 />
               )}
-            </div>
+            </FormField>
           )}
 
-          {/* Language — snippet, command */}
           {showLanguage && (
-            <div className="space-y-1.5">
-              <Label htmlFor="item-language" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Language
-              </Label>
+            <FormField label="Language" htmlFor="item-language">
               <Input
                 id="item-language"
                 value={form.language}
@@ -273,14 +269,10 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
                 placeholder="e.g. typescript"
                 className="text-sm"
               />
-            </div>
+            </FormField>
           )}
 
-          {/* Tags */}
-          <div className="space-y-1.5">
-            <Label htmlFor="item-tags" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Tags
-            </Label>
+          <FormField label="Tags" htmlFor="item-tags" hint="Comma-separated">
             <Input
               id="item-tags"
               value={form.tags}
@@ -288,20 +280,15 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
               placeholder="react, hooks, auth"
               className="text-sm"
             />
-            <p className="text-xs text-muted-foreground">Comma-separated</p>
-          </div>
+          </FormField>
 
-          {/* Collections */}
-          <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Collections
-            </Label>
+          <FormField label="Collections">
             <CollectionSelector
               collections={collections}
               selected={selectedCollectionIds}
               onChange={setSelectedCollectionIds}
             />
-          </div>
+          </FormField>
 
           <DialogFooter className="pt-2">
             <Button type="button" variant="outline" onClick={handleClose} disabled={saving}>

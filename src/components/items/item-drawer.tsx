@@ -72,6 +72,229 @@ function itemToEditState(item: ItemDetail): EditState {
   };
 }
 
+function DrawerHeader({
+  item,
+  editMode,
+  editState,
+  color,
+  Icon,
+  onUpdateTitle,
+}: {
+  item: ItemDetail;
+  editMode: boolean;
+  editState: EditState | null;
+  color: string;
+  Icon: React.ElementType;
+  onUpdateTitle: (value: string) => void;
+}) {
+  return (
+    <SheetHeader className="px-4 pt-4 pb-3">
+      <div className="flex items-center gap-2 mb-2">
+        <div
+          className="h-7 w-7 rounded-md flex items-center justify-center shrink-0"
+          style={{ backgroundColor: `${color}18` }}
+        >
+          <Icon className="h-4 w-4" style={{ color }} />
+        </div>
+        <Badge variant="secondary" className="text-xs capitalize">
+          {item.itemType.name}
+        </Badge>
+        {!editMode && item.language && (
+          <Badge variant="outline" className="text-xs">
+            {item.language}
+          </Badge>
+        )}
+      </div>
+      {editMode ? (
+        <Input
+          value={editState?.title ?? ''}
+          onChange={(e) => onUpdateTitle(e.target.value)}
+          className="text-base font-semibold pr-8"
+          placeholder="Title"
+        />
+      ) : (
+        <SheetTitle className="text-base leading-snug pr-8">
+          {item.title}
+        </SheetTitle>
+      )}
+    </SheetHeader>
+  );
+}
+
+function DrawerActionBar({
+  editMode,
+  saving,
+  isFavorite,
+  isPinned,
+  canSave,
+  showFileItem,
+  itemId,
+  fileUrl,
+  fileName,
+  onSave,
+  onCancel,
+  onToggleFavorite,
+  onTogglePin,
+  onEditStart,
+  onDeleteClick,
+}: {
+  editMode: boolean;
+  saving: boolean;
+  isFavorite: boolean;
+  isPinned: boolean;
+  canSave: boolean;
+  showFileItem: boolean;
+  itemId: string;
+  fileUrl: string | null;
+  fileName: string | null;
+  onSave: () => void;
+  onCancel: () => void;
+  onToggleFavorite: () => void;
+  onTogglePin: () => void;
+  onEditStart: () => void;
+  onDeleteClick: () => void;
+}) {
+  if (editMode) {
+    return (
+      <div className="flex items-center gap-2 px-3 py-2 border-y border-border">
+        <Button size="sm" className="gap-1.5" onClick={onSave} disabled={saving || !canSave}>
+          <Save className="h-4 w-4" />
+          {saving ? 'Saving…' : 'Save'}
+        </Button>
+        <Button variant="ghost" size="sm" className="gap-1.5" onClick={onCancel} disabled={saving}>
+          <X className="h-4 w-4" />
+          Cancel
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-0.5 px-3 py-2 border-y border-border">
+      <Button
+        variant="ghost"
+        size="sm"
+        className={`gap-1.5 ${isFavorite ? 'text-amber-400' : ''}`}
+        onClick={onToggleFavorite}
+      >
+        <Star className={`h-4 w-4 ${isFavorite ? 'fill-amber-400' : ''}`} />
+        Favorite
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        className={`gap-1.5 ${isPinned ? 'text-blue-400' : ''}`}
+        onClick={onTogglePin}
+      >
+        <Pin className={`h-4 w-4 ${isPinned ? 'fill-blue-400' : ''}`} />
+        Pin
+      </Button>
+      <Button variant="ghost" size="sm" className="gap-1.5">
+        <Copy className="h-4 w-4" />
+        Copy
+      </Button>
+      {showFileItem && fileUrl && (
+        <a
+          href={`/api/download/${itemId}`}
+          download={fileName ?? undefined}
+          className={buttonVariants({ variant: 'ghost', size: 'sm' }) + ' gap-1.5'}
+        >
+          <Download className="h-4 w-4" />
+          Download
+        </a>
+      )}
+      <Button variant="ghost" size="sm" className="gap-1.5" onClick={onEditStart}>
+        <Pencil className="h-4 w-4" />
+        Edit
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="gap-1.5 text-muted-foreground hover:text-destructive"
+        onClick={onDeleteClick}
+      >
+        <Trash2 className="h-4 w-4" />
+        Delete
+      </Button>
+    </div>
+  );
+}
+
+function FileItemPreview({
+  typeName,
+  fileUrl,
+  fileName,
+  fileSize,
+  title,
+}: {
+  typeName: string;
+  fileUrl: string;
+  fileName: string | null;
+  fileSize: number | null;
+  title: string;
+}) {
+  return (
+    <div>
+      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
+        {typeName === 'image' ? 'Image' : 'File'}
+      </p>
+      {typeName === 'image' ? (
+        <div className="rounded-lg border border-border overflow-hidden">
+          <div className="bg-muted/30 flex items-center justify-center p-3 max-h-64 overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${fileUrl}`}
+              alt={fileName ?? title}
+              className="max-h-56 max-w-full object-contain rounded"
+            />
+          </div>
+          {fileName && (
+            <div className="flex items-center gap-2 px-3 py-2 border-t border-border">
+              <ImageIcon className="h-4 w-4 text-muted-foreground shrink-0" />
+              <span className="text-sm truncate">{fileName}</span>
+              {fileSize != null && (
+                <span className="text-xs text-muted-foreground ml-auto shrink-0">
+                  {formatFileSize(fileSize)}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="flex items-center gap-3 rounded-lg border border-border px-3 py-2.5">
+          <FileText className="h-5 w-5 text-muted-foreground shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">{fileName ?? 'File'}</p>
+            {fileSize != null && (
+              <p className="text-xs text-muted-foreground">{formatFileSize(fileSize)}</p>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ItemDetailsSection({ createdAt, updatedAt }: { createdAt: Date; updatedAt: Date }) {
+  return (
+    <div>
+      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
+        Details
+      </p>
+      <div className="space-y-1 text-xs text-muted-foreground">
+        <div className="flex justify-between">
+          <span>Created</span>
+          <span>{formatDate(new Date(createdAt))}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Updated</span>
+          <span>{formatDate(new Date(updatedAt))}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
   const router = useRouter();
   const [item, setItem] = useState<ItemDetail | null>(null);
@@ -227,110 +450,32 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
         )}
         {!loading && !error && item && (
           <>
-            {/* Header */}
-            <SheetHeader className="px-4 pt-4 pb-3">
-              <div className="flex items-center gap-2 mb-2">
-                <div
-                  className="h-7 w-7 rounded-md flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: `${color}18` }}
-                >
-                  <Icon className="h-4 w-4" style={{ color }} />
-                </div>
-                <Badge variant="secondary" className="text-xs capitalize">
-                  {item.itemType.name}
-                </Badge>
-                {!editMode && item.language && (
-                  <Badge variant="outline" className="text-xs">
-                    {item.language}
-                  </Badge>
-                )}
-              </div>
-              {editMode ? (
-                <Input
-                  value={editState?.title ?? ''}
-                  onChange={(e) => updateField('title', e.target.value)}
-                  className="text-base font-semibold pr-8"
-                  placeholder="Title"
-                />
-              ) : (
-                <SheetTitle className="text-base leading-snug pr-8">
-                  {item.title}
-                </SheetTitle>
-              )}
-            </SheetHeader>
+            <DrawerHeader
+              item={item}
+              editMode={editMode}
+              editState={editState}
+              color={color}
+              Icon={Icon}
+              onUpdateTitle={(v) => updateField('title', v)}
+            />
 
-            {/* Action bar */}
-            {editMode ? (
-              <div className="flex items-center gap-2 px-3 py-2 border-y border-border">
-                <Button
-                  size="sm"
-                  className="gap-1.5"
-                  onClick={handleSave}
-                  disabled={saving || !editState?.title.trim()}
-                >
-                  <Save className="h-4 w-4" />
-                  {saving ? 'Saving…' : 'Save'}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="gap-1.5"
-                  onClick={handleCancel}
-                  disabled={saving}
-                >
-                  <X className="h-4 w-4" />
-                  Cancel
-                </Button>
-              </div>
-            ) : (
-              <div className="flex flex-wrap items-center gap-0.5 px-3 py-2 border-y border-border">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`gap-1.5 ${isFavorite ? 'text-amber-400' : ''}`}
-                  onClick={handleToggleFavorite}
-                >
-                  <Star className={`h-4 w-4 ${isFavorite ? 'fill-amber-400' : ''}`} />
-                  Favorite
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`gap-1.5 ${isPinned ? 'text-blue-400' : ''}`}
-                  onClick={handleTogglePin}
-                >
-                  <Pin className={`h-4 w-4 ${isPinned ? 'fill-blue-400' : ''}`} />
-                  Pin
-                </Button>
-                <Button variant="ghost" size="sm" className="gap-1.5">
-                  <Copy className="h-4 w-4" />
-                  Copy
-                </Button>
-                {showFileItem && item.fileUrl && (
-                  <a
-                    href={`/api/download/${item.id}`}
-                    download={item.fileName ?? undefined}
-                    className={buttonVariants({ variant: 'ghost', size: 'sm' }) + ' gap-1.5'}
-                  >
-                    <Download className="h-4 w-4" />
-                    Download
-                  </a>
-                )}
-                <Button variant="ghost" size="sm" className="gap-1.5" onClick={handleEditStart}>
-                  <Pencil className="h-4 w-4" />
-                  Edit
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="gap-1.5 text-muted-foreground hover:text-destructive"
-                  onClick={() => setDeleteConfirmOpen(true)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Delete
-                </Button>
-              </div>
-            )}
+            <DrawerActionBar
+              editMode={editMode}
+              saving={saving}
+              isFavorite={isFavorite}
+              isPinned={isPinned}
+              canSave={!!editState?.title.trim()}
+              showFileItem={showFileItem}
+              itemId={item.id}
+              fileUrl={item.fileUrl}
+              fileName={item.fileName}
+              onSave={handleSave}
+              onCancel={handleCancel}
+              onToggleFavorite={handleToggleFavorite}
+              onTogglePin={handleTogglePin}
+              onEditStart={handleEditStart}
+              onDeleteClick={() => setDeleteConfirmOpen(true)}
+            />
 
             {/* Body */}
             <div className="px-4 py-4 space-y-5">
@@ -426,21 +571,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                     />
                   </div>
 
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
-                      Details
-                    </p>
-                    <div className="space-y-1 text-xs text-muted-foreground">
-                      <div className="flex justify-between">
-                        <span>Created</span>
-                        <span>{formatDate(new Date(item.createdAt))}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Updated</span>
-                        <span>{formatDate(new Date(item.updatedAt))}</span>
-                      </div>
-                    </div>
-                  </div>
+                  <ItemDetailsSection createdAt={item.createdAt} updatedAt={item.updatedAt} />
                 </>
               ) : (
                 <>
@@ -470,48 +601,13 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                   )}
 
                   {showFileItem && item.fileUrl && (
-                    <div>
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
-                        {typeName === 'image' ? 'Image' : 'File'}
-                      </p>
-                      {typeName === 'image' ? (
-                        <div className="rounded-lg border border-border overflow-hidden">
-                          <div className="bg-muted/30 flex items-center justify-center p-3 max-h-64 overflow-hidden">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={`${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${item.fileUrl}`}
-                              alt={item.fileName ?? item.title}
-                              className="max-h-56 max-w-full object-contain rounded"
-                            />
-                          </div>
-                          {item.fileName && (
-                            <div className="flex items-center gap-2 px-3 py-2 border-t border-border">
-                              <ImageIcon className="h-4 w-4 text-muted-foreground shrink-0" />
-                              <span className="text-sm truncate">{item.fileName}</span>
-                              {item.fileSize != null && (
-                                <span className="text-xs text-muted-foreground ml-auto shrink-0">
-                                  {formatFileSize(item.fileSize)}
-                                </span>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-3 rounded-lg border border-border px-3 py-2.5">
-                          <FileText className="h-5 w-5 text-muted-foreground shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">
-                              {item.fileName ?? 'File'}
-                            </p>
-                            {item.fileSize != null && (
-                              <p className="text-xs text-muted-foreground">
-                                {formatFileSize(item.fileSize)}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                    <FileItemPreview
+                      typeName={typeName}
+                      fileUrl={item.fileUrl}
+                      fileName={item.fileName}
+                      fileSize={item.fileSize}
+                      title={item.title}
+                    />
                   )}
 
                   {!showFileItem && item.content && (
@@ -526,10 +622,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                           readOnly
                         />
                       ) : (
-                        <MarkdownEditor
-                          value={item.content}
-                          readOnly
-                        />
+                        <MarkdownEditor value={item.content} readOnly />
                       )}
                     </div>
                   )}
@@ -564,21 +657,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
                     </div>
                   )}
 
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
-                      Details
-                    </p>
-                    <div className="space-y-1 text-xs text-muted-foreground">
-                      <div className="flex justify-between">
-                        <span>Created</span>
-                        <span>{formatDate(new Date(item.createdAt))}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Updated</span>
-                        <span>{formatDate(new Date(item.updatedAt))}</span>
-                      </div>
-                    </div>
-                  </div>
+                  <ItemDetailsSection createdAt={item.createdAt} updatedAt={item.updatedAt} />
                 </>
               )}
             </div>

@@ -12,6 +12,11 @@ import {
 } from '@/lib/db/items';
 import type { ItemDetail, DashboardItem } from '@/lib/db/items';
 
+async function getAuthUserId(): Promise<string | null> {
+  const session = await auth();
+  return session?.user?.id ?? null;
+}
+
 const UpdateItemSchema = z.object({
   title: z.string().trim().min(1, 'Title is required'),
   description: z.string().trim().nullable().optional(),
@@ -32,10 +37,8 @@ export async function updateItem(
   itemId: string,
   input: UpdateItemInput
 ): Promise<ActionResult<ItemDetail>> {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false, error: 'Unauthorized' };
-  }
+  const userId = await getAuthUserId();
+  if (!userId) return { success: false, error: 'Unauthorized' };
 
   const parsed = UpdateItemSchema.safeParse(input);
   if (!parsed.success) {
@@ -46,7 +49,7 @@ export async function updateItem(
   const { title, description, content, url, language, tags, collectionIds } = parsed.data;
 
   try {
-    const updated = await updateItemQuery(itemId, session.user.id, {
+    const updated = await updateItemQuery(itemId, userId, {
       title,
       description: description ?? null,
       content: content ?? null,
@@ -107,10 +110,8 @@ const CreateItemSchema = z
 type CreateItemInput = z.infer<typeof CreateItemSchema>;
 
 export async function createItem(input: CreateItemInput): Promise<ActionResult<DashboardItem>> {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false, error: 'Unauthorized' };
-  }
+  const userId = await getAuthUserId();
+  if (!userId) return { success: false, error: 'Unauthorized' };
 
   const parsed = CreateItemSchema.safeParse(input);
   if (!parsed.success) {
@@ -122,7 +123,7 @@ export async function createItem(input: CreateItemInput): Promise<ActionResult<D
     parsed.data;
 
   try {
-    const created = await createItemQuery(session.user.id, {
+    const created = await createItemQuery(userId, {
       title,
       description: description ?? null,
       content: content ?? null,
@@ -142,13 +143,11 @@ export async function createItem(input: CreateItemInput): Promise<ActionResult<D
 }
 
 export async function toggleItemFavorite(itemId: string): Promise<ActionResult<{ isFavorite: boolean }>> {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false, error: 'Unauthorized' };
-  }
+  const userId = await getAuthUserId();
+  if (!userId) return { success: false, error: 'Unauthorized' };
 
   try {
-    const result = await toggleItemFavoriteQuery(itemId, session.user.id);
+    const result = await toggleItemFavoriteQuery(itemId, userId);
     if (!result) {
       return { success: false, error: 'Item not found' };
     }
@@ -159,13 +158,11 @@ export async function toggleItemFavorite(itemId: string): Promise<ActionResult<{
 }
 
 export async function toggleItemPin(itemId: string): Promise<ActionResult<{ isPinned: boolean }>> {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false, error: 'Unauthorized' };
-  }
+  const userId = await getAuthUserId();
+  if (!userId) return { success: false, error: 'Unauthorized' };
 
   try {
-    const result = await toggleItemPinQuery(itemId, session.user.id);
+    const result = await toggleItemPinQuery(itemId, userId);
     if (!result) {
       return { success: false, error: 'Item not found' };
     }
@@ -176,13 +173,11 @@ export async function toggleItemPin(itemId: string): Promise<ActionResult<{ isPi
 }
 
 export async function deleteItem(itemId: string): Promise<ActionResult<void>> {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false, error: 'Unauthorized' };
-  }
+  const userId = await getAuthUserId();
+  if (!userId) return { success: false, error: 'Unauthorized' };
 
   try {
-    const result = await deleteItemQuery(itemId, session.user.id);
+    const result = await deleteItemQuery(itemId, userId);
     if (!result.deleted) {
       return { success: false, error: 'Item not found' };
     }

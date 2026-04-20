@@ -112,32 +112,34 @@ export interface ItemDetail {
   itemType: { name: string; icon: string; color: string };
 }
 
+const itemDetailSelect = {
+  id: true,
+  title: true,
+  description: true,
+  contentType: true,
+  content: true,
+  fileUrl: true,
+  fileName: true,
+  fileSize: true,
+  url: true,
+  language: true,
+  isFavorite: true,
+  isPinned: true,
+  createdAt: true,
+  updatedAt: true,
+  tags: { select: { name: true } },
+  collections: {
+    select: {
+      collection: { select: { id: true, name: true } },
+    },
+  },
+  itemType: { select: { name: true, icon: true, color: true } },
+} as const;
+
 export async function getItemById(id: string, userId: string): Promise<ItemDetail | null> {
   return prisma.item.findFirst({
     where: { id, userId },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      contentType: true,
-      content: true,
-      fileUrl: true,
-      fileName: true,
-      fileSize: true,
-      url: true,
-      language: true,
-      isFavorite: true,
-      isPinned: true,
-      createdAt: true,
-      updatedAt: true,
-      tags: { select: { name: true } },
-      collections: {
-        select: {
-          collection: { select: { id: true, name: true } },
-        },
-      },
-      itemType: { select: { name: true, icon: true, color: true } },
-    },
+    select: itemDetailSelect,
   });
 }
 
@@ -158,6 +160,15 @@ export async function updateItem(
 ): Promise<ItemDetail | null> {
   const existing = await prisma.item.findFirst({ where: { id, userId }, select: { id: true } });
   if (!existing) return null;
+
+  if (data.collectionIds?.length) {
+    const ownedCount = await prisma.collection.count({
+      where: { id: { in: data.collectionIds }, userId },
+    });
+    if (ownedCount !== data.collectionIds.length) {
+      throw new Error('Invalid collection ID');
+    }
+  }
 
   return prisma.item.update({
     where: { id },
@@ -181,29 +192,7 @@ export async function updateItem(
         },
       }),
     },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      contentType: true,
-      content: true,
-      fileUrl: true,
-      fileName: true,
-      fileSize: true,
-      url: true,
-      language: true,
-      isFavorite: true,
-      isPinned: true,
-      createdAt: true,
-      updatedAt: true,
-      tags: { select: { name: true } },
-      collections: {
-        select: {
-          collection: { select: { id: true, name: true } },
-        },
-      },
-      itemType: { select: { name: true, icon: true, color: true } },
-    },
+    select: itemDetailSelect,
   });
 }
 
@@ -236,6 +225,15 @@ export interface CreateItemData {
 }
 
 export async function createItem(userId: string, data: CreateItemData): Promise<DashboardItem> {
+  if (data.collectionIds?.length) {
+    const ownedCount = await prisma.collection.count({
+      where: { id: { in: data.collectionIds }, userId },
+    });
+    if (ownedCount !== data.collectionIds.length) {
+      throw new Error('Invalid collection ID');
+    }
+  }
+
   const itemType = await prisma.itemType.findFirst({
     where: { name: data.typeName, isSystem: true },
     select: { id: true },
