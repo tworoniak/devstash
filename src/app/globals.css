@@ -128,7 +128,13 @@
   html {
     @apply font-sans;
     color-scheme: dark;
+    scroll-behavior: smooth;
   }
+}
+
+@keyframes arrowPulse {
+  0%, 100% { opacity: 0.4; transform: scaleX(1); }
+  50%       { opacity: 1;   transform: scaleX(1.15); }
 }
 
 /* Markdown preview — prose overrides for dark editor chrome */

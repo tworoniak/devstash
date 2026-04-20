@@ -1,15 +1,40 @@
-# Current Feature
+# Current Feature: Homepage
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Convert `prototypes/homepage/` static prototype into the actual Next.js homepage at `src/app/page.tsx`
+- Implement all 7 sections: Navbar, Hero, Features, AI Section, Pricing, CTA, Footer
+- Faithful reproduction of prototype design, layout, and animations using Tailwind CSS and shadcn/ui
+- Chaos animation (floating icons with bounce + mouse repulsion) ported to React via `useEffect` + `requestAnimationFrame`
+- Pricing monthly/yearly toggle with dynamic price display
+- Scroll fade-in animations via `IntersectionObserver`
+- Navbar scroll background effect and mobile hamburger menu
+- All navigation links wired correctly (sign-in, register, anchor scrolls)
+- Fully responsive: 3-col → 2-col → 1-col grids, stacked mobile layout
+
 ## Notes
+
+- Server components: `page.tsx`, `FeaturesSection`, `AISection`, `CTASection`, `Footer`
+- Client components: `Navbar`, `HeroSection`, `ChaosAnimation`, `DashboardPreview`, `PricingSection`, `ScrollFadeIn`
+- All components live under `src/components/homepage/`
+- Use Lucide React icons (already installed) instead of inline SVGs
+- Use `Link` from `next/link` for internal routes, plain `<a>` for anchor links
+- Gradient text: `bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400 bg-clip-text text-transparent`
+- Chaos animation: port `requestAnimationFrame` loop into `useEffect` with ref-based state; clean up on unmount
+- `ScrollFadeIn`: `IntersectionObserver` with `threshold: 0.1`, opacity 0→1 + translateY 24px→0
+- Pricing: `$8/month` → `$6/month (billed $72/yr)` when yearly toggle is on
+- Footer year: `{new Date().getFullYear()}` inline
+- Add `scroll-smooth` to html/body via globals.css or layout
+- Dark theme matching prototype; use existing CSS variables where applicable
+- References: `prototypes/homepage/index.html`, `styles.css`, `script.js`
 
 ## History
 
+- **Favorites Page** - /favorites route (auth-protected) with compact monospace list; separate Items and Collections sections with counts; FavoriteItemRow opens ItemDrawer on click; FavoriteCollectionRow links to /collections/[id]; empty state; sorted by updatedAt desc; toggleItemFavorite db query with ownership check; toggleItemFavorite server action with auth guard; Favorite button in ItemDrawer wired with optimistic local state (syncs on item load, flips instantly, reverts on error), toast on success/error, router.refresh(); "View all favorites" link added to sidebar under Collections > Favorites sub-section; TopBar star button removed (Completed)
 - **Pinned Items** - toggleItemPin db query with ownership check; toggleItemPin server action with auth guard; Pin button in ItemDrawer wired with optimistic local state (synced on item load, flips instantly, reverts on error), toast on success/error, router.refresh() syncs list; pinned-first sort in getItemsByType and dashboard getDashboardPinnedItems were already correct (Completed)
 - **Homepage Mockup** - Standalone marketing prototype at prototypes/homepage/ (index.html, styles.css, script.js); hero with animated chaos-to-order visual (8 floating icons bounce off walls + mouse repel via requestAnimationFrame), pulsing arrow, mini dashboard preview with colored item cards; fixed nav turns frosted glass on scroll, mobile hamburger menu; 6-card features grid with type accent colors + hover top-border reveal; AI section with code editor mockup and AI tag demo; pricing with monthly/yearly toggle ($8/mo → $6/mo billed $72/yr); CTA and footer; scroll fade-ins via IntersectionObserver; responsive mobile stack with 90° arrow rotation (Completed)
 - **File List View** - FileListRow component with extension-based icon (FileImage/FileCode/FileArchive/FileText/File), file name, size, upload date, hover-reveal download button (stopPropagation); files type page uses 1→2→3 column grid; gray left border accent + card border matching other item views; fileName/fileSize added to DashboardItem select; item drawer action bar changed to flex-wrap with Delete button moved inline (Completed)
