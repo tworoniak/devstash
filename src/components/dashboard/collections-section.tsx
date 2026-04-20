@@ -1,24 +1,16 @@
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
-import { prisma } from '@/lib/prisma';
+import { auth } from '@/auth';
 import { getDashboardCollections } from '@/lib/db/collections';
 import { CollectionCard } from './collection-card';
-
-async function getDemoUserId() {
-  const user = await prisma.user.findUnique({
-    where: { email: 'demo@devstash.io' },
-    select: { id: true },
-  });
-  return user?.id ?? null;
-}
 
 export async function CollectionsSection() {
   let collections: Awaited<ReturnType<typeof getDashboardCollections>> = [];
 
   try {
-    const userId = await getDemoUserId();
-    if (userId) {
-      collections = await getDashboardCollections(userId);
+    const session = await auth();
+    if (session?.user?.id) {
+      collections = await getDashboardCollections(session.user.id);
     }
   } catch (err) {
     console.error('Failed to load collections:', err);

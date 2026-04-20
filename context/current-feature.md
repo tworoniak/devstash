@@ -1,15 +1,27 @@
-# Current Feature
+# Current Feature: Collections Index Page
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Create `src/app/collections/page.tsx` — server component that lists all of the user's collections using `CollectionCard`
+- Add `getAllCollections(userId)` db query to `src/lib/db/collections.ts` (same shape as `getDashboardCollections` but without the `DASHBOARD_COLLECTIONS_LIMIT` cap)
+- Empty state when user has no collections
+- Show collection count in the page heading
+
 ## Notes
+
+- `/collections/[id]/page.tsx` already exists — no changes needed there
+- Sidebar "View all collections" already links to `/collections` — no changes needed
+- `CollectionCard` already links to `/collections/${collection.id}` — no changes needed
+- The `collections/layout.tsx` already wraps children in `DashboardShell` with auth — the new page gets this for free
+- Reuse `getDashboardCollections` shape for the new query; just remove the `take` limit and order by name or createdAt desc
 
 ## History
 
+- **Item Collection Assignment** - Multi-select collection picker added to New Item dialog and Item Drawer edit mode; getUserCollections db query in src/lib/db/collections.ts + server action in src/actions/collections.ts (auth-guarded); createItem and updateItem db queries extended with optional collectionIds (create wires join table on create, update does deleteMany+create to fully sync); CollectionSelector component at src/components/shared/collection-selector.tsx (scrollable checkbox list, max-h-36, empty state); Checkbox shadcn component added; NewItemDialog fetches collections on open, resets selection on close; ItemDrawer edit mode replaces static badge list with live CollectionSelector initialized from item.collections, passes collectionIds to updateItem on save (Completed)
 - **Collection Create** - "New Collection" button in TopBar opens a modal dialog; fields: name (required) + description (optional); createCollection db query in src/lib/db/collections.ts; createCollection server action in src/actions/collections.ts with auth guard and Zod validation; NewCollectionDialog component at src/components/collections/new-collection-dialog.tsx; onNewCollection prop added to TopBar and wired in DashboardShell alongside NewItemDialog; toast on success/failure; router.refresh() syncs sidebar and dashboard (Completed)
 - **Pagination** - Pagination on /items/[type] and /collections/[id] pages; ITEMS_PER_PAGE=21, COLLECTIONS_PER_PAGE=21 constants in src/lib/constants/pagination.ts; getItemsByType updated to paginate with skip/take (returns { items, total }); getCollectionWithItems added for paginated collection detail with ownership check; Pagination component (src/components/shared/pagination.tsx) with numbered page links, prev/next greyed at boundaries, ellipsis for > 7 pages, uses ?page=N URL params; /collections/[id] page created with collection header, mixed item type rendering, and Pagination; /collections/layout.tsx added with auth + sidebar shell (Completed)
 - **Homepage** - Converted prototypes/homepage/ to the real Next.js homepage at src/app/page.tsx; 10 components under src/components/homepage/: Navbar (fixed, scroll frosted-glass bg, mobile hamburger), HeroSection with ChaosAnimation (8 icons bounce off walls + mouse repulsion via rAF, ref-based state, cleanup on unmount) and DashboardPreview (static mini-sidebar + 2-col card grid), FeaturesSection (6 cards, hover top-border accent reveal), AISection (split layout, code editor mockup with AI tags), PricingSection (monthly/yearly toggle, $8→$6/mo billed $72/yr), CTASection, Footer (Product/Resources/Company link columns, dynamic year); ScrollFadeIn wrapper (IntersectionObserver, opacity 0→1 + translateY 24px→0); scroll-smooth + arrowPulse keyframe added to globals.css; all nav links wired (sign-in, register, #features, #pricing anchors); fully responsive (Completed)

@@ -1,14 +1,6 @@
 import { Box, Layers, Star, FolderOpen } from 'lucide-react';
-import { prisma } from '@/lib/prisma';
+import { auth } from '@/auth';
 import { getDashboardStats } from '@/lib/db/items';
-
-async function getDemoUserId() {
-  const user = await prisma.user.findUnique({
-    where: { email: 'demo@devstash.io' },
-    select: { id: true },
-  });
-  return user?.id ?? null;
-}
 
 export async function StatsSection() {
   let totalItems = 0;
@@ -17,10 +9,10 @@ export async function StatsSection() {
   let favoriteCollections = 0;
 
   try {
-    const userId = await getDemoUserId();
-    if (userId) {
+    const session = await auth();
+    if (session?.user?.id) {
       ({ totalItems, totalCollections, favoriteItems, favoriteCollections } =
-        await getDashboardStats(userId));
+        await getDashboardStats(session.user.id));
     }
   } catch (err) {
     console.error('Failed to load stats:', err);
