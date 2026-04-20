@@ -1,6 +1,5 @@
 import { prisma } from '@/lib/prisma';
-
-const DASHBOARD_RECENT_ITEMS_LIMIT = 10;
+import { ITEMS_PER_PAGE, DASHBOARD_RECENT_ITEMS_LIMIT } from '@/lib/constants/pagination';
 
 export interface DashboardStats {
   totalItems: number;
@@ -62,7 +61,7 @@ export interface DashboardItem {
   };
 }
 
-const itemSelect = {
+export const itemSelect = {
   id: true,
   title: true,
   description: true,
@@ -323,13 +322,22 @@ export async function getFavoriteItems(userId: string): Promise<FavoriteItem[]> 
   });
 }
 
-export async function getItemsByType(userId: string, typeName: string): Promise<DashboardItem[]> {
-  return prisma.item.findMany({
-    where: {
-      userId,
-      itemType: { name: typeName },
-    },
-    orderBy: [{ isPinned: 'desc' }, { createdAt: 'desc' }],
-    select: itemSelect,
-  });
+export async function getItemsByType(
+  userId: string,
+  typeName: string,
+  page: number = 1
+): Promise<{ items: DashboardItem[]; total: number }> {
+  const skip = (page - 1) * ITEMS_PER_PAGE;
+  const where = { userId, itemType: { name: typeName } };
+  const [items, total] = await Promise.all([
+    prisma.item.findMany({
+      where,
+      orderBy: [{ isPinned: 'desc' }, { createdAt: 'desc' }],
+      skip,
+      take: ITEMS_PER_PAGE,
+      select: itemSelect,
+    }),
+    prisma.item.count({ where }),
+  ]);
+  return { items, total };
 }

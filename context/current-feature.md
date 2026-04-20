@@ -1,12 +1,24 @@
-# Current Feature
+# Current Feature: Pagination
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Add pagination to `/items/[type]` page with numbered page links + prev/next controls
+- Add pagination to `/collections/[id]` page with numbered page links + prev/next controls
+- Prev/Next disabled (greyed out) when not applicable
+- Only fetch the items needed for the current page (no over-fetching)
+
 ## Notes
+
+- `ITEMS_PER_PAGE = 21`
+- `COLLECTIONS_PER_PAGE = 21` (items per page on a collection detail page)
+- `DASHBOARD_COLLECTIONS_LIMIT = 6` (dashboard only — no pagination, just a cap)
+- `DASHBOARD_RECENT_ITEMS_LIMIT = 10` (dashboard only — no pagination, just a cap)
+- Use URL search params (`?page=2`) for page state — server component friendly, no client state needed
+- Pagination controls: numbered page links + Prev / Next, greyed out when disabled
 
 ## History
 
