@@ -1,27 +1,16 @@
-# Current Feature: Pagination
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add pagination to `/items/[type]` page with numbered page links + prev/next controls
-- Add pagination to `/collections/[id]` page with numbered page links + prev/next controls
-- Prev/Next disabled (greyed out) when not applicable
-- Only fetch the items needed for the current page (no over-fetching)
-
 ## Notes
-
-- `ITEMS_PER_PAGE = 21`
-- `COLLECTIONS_PER_PAGE = 21` (items per page on a collection detail page)
-- `DASHBOARD_COLLECTIONS_LIMIT = 6` (dashboard only — no pagination, just a cap)
-- `DASHBOARD_RECENT_ITEMS_LIMIT = 10` (dashboard only — no pagination, just a cap)
-- Use URL search params (`?page=2`) for page state — server component friendly, no client state needed
-- Pagination controls: numbered page links + Prev / Next, greyed out when disabled
 
 ## History
 
+- **Pagination** - Pagination on /items/[type] and /collections/[id] pages; ITEMS_PER_PAGE=21, COLLECTIONS_PER_PAGE=21 constants in src/lib/constants/pagination.ts; getItemsByType updated to paginate with skip/take (returns { items, total }); getCollectionWithItems added for paginated collection detail with ownership check; Pagination component (src/components/shared/pagination.tsx) with numbered page links, prev/next greyed at boundaries, ellipsis for > 7 pages, uses ?page=N URL params; /collections/[id] page created with collection header, mixed item type rendering, and Pagination; /collections/layout.tsx added with auth + sidebar shell (Completed)
 - **Homepage** - Converted prototypes/homepage/ to the real Next.js homepage at src/app/page.tsx; 10 components under src/components/homepage/: Navbar (fixed, scroll frosted-glass bg, mobile hamburger), HeroSection with ChaosAnimation (8 icons bounce off walls + mouse repulsion via rAF, ref-based state, cleanup on unmount) and DashboardPreview (static mini-sidebar + 2-col card grid), FeaturesSection (6 cards, hover top-border accent reveal), AISection (split layout, code editor mockup with AI tags), PricingSection (monthly/yearly toggle, $8→$6/mo billed $72/yr), CTASection, Footer (Product/Resources/Company link columns, dynamic year); ScrollFadeIn wrapper (IntersectionObserver, opacity 0→1 + translateY 24px→0); scroll-smooth + arrowPulse keyframe added to globals.css; all nav links wired (sign-in, register, #features, #pricing anchors); fully responsive (Completed)
 - **Favorites Page** - /favorites route (auth-protected) with compact monospace list; separate Items and Collections sections with counts; FavoriteItemRow opens ItemDrawer on click; FavoriteCollectionRow links to /collections/[id]; empty state; sorted by updatedAt desc; toggleItemFavorite db query with ownership check; toggleItemFavorite server action with auth guard; Favorite button in ItemDrawer wired with optimistic local state (syncs on item load, flips instantly, reverts on error), toast on success/error, router.refresh(); "View all favorites" link added to sidebar under Collections > Favorites sub-section; TopBar star button removed (Completed)
 - **Pinned Items** - toggleItemPin db query with ownership check; toggleItemPin server action with auth guard; Pin button in ItemDrawer wired with optimistic local state (synced on item load, flips instantly, reverts on error), toast on success/error, router.refresh() syncs list; pinned-first sort in getItemsByType and dashboard getDashboardPinnedItems were already correct (Completed)
