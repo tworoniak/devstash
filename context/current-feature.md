@@ -1,39 +1,16 @@
-# Current Feature: Homepage
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Convert `prototypes/homepage/` static prototype into the actual Next.js homepage at `src/app/page.tsx`
-- Implement all 7 sections: Navbar, Hero, Features, AI Section, Pricing, CTA, Footer
-- Faithful reproduction of prototype design, layout, and animations using Tailwind CSS and shadcn/ui
-- Chaos animation (floating icons with bounce + mouse repulsion) ported to React via `useEffect` + `requestAnimationFrame`
-- Pricing monthly/yearly toggle with dynamic price display
-- Scroll fade-in animations via `IntersectionObserver`
-- Navbar scroll background effect and mobile hamburger menu
-- All navigation links wired correctly (sign-in, register, anchor scrolls)
-- Fully responsive: 3-col → 2-col → 1-col grids, stacked mobile layout
-
 ## Notes
-
-- Server components: `page.tsx`, `FeaturesSection`, `AISection`, `CTASection`, `Footer`
-- Client components: `Navbar`, `HeroSection`, `ChaosAnimation`, `DashboardPreview`, `PricingSection`, `ScrollFadeIn`
-- All components live under `src/components/homepage/`
-- Use Lucide React icons (already installed) instead of inline SVGs
-- Use `Link` from `next/link` for internal routes, plain `<a>` for anchor links
-- Gradient text: `bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400 bg-clip-text text-transparent`
-- Chaos animation: port `requestAnimationFrame` loop into `useEffect` with ref-based state; clean up on unmount
-- `ScrollFadeIn`: `IntersectionObserver` with `threshold: 0.1`, opacity 0→1 + translateY 24px→0
-- Pricing: `$8/month` → `$6/month (billed $72/yr)` when yearly toggle is on
-- Footer year: `{new Date().getFullYear()}` inline
-- Add `scroll-smooth` to html/body via globals.css or layout
-- Dark theme matching prototype; use existing CSS variables where applicable
-- References: `prototypes/homepage/index.html`, `styles.css`, `script.js`
 
 ## History
 
+- **Homepage** - Converted prototypes/homepage/ to the real Next.js homepage at src/app/page.tsx; 10 components under src/components/homepage/: Navbar (fixed, scroll frosted-glass bg, mobile hamburger), HeroSection with ChaosAnimation (8 icons bounce off walls + mouse repulsion via rAF, ref-based state, cleanup on unmount) and DashboardPreview (static mini-sidebar + 2-col card grid), FeaturesSection (6 cards, hover top-border accent reveal), AISection (split layout, code editor mockup with AI tags), PricingSection (monthly/yearly toggle, $8→$6/mo billed $72/yr), CTASection, Footer (Product/Resources/Company link columns, dynamic year); ScrollFadeIn wrapper (IntersectionObserver, opacity 0→1 + translateY 24px→0); scroll-smooth + arrowPulse keyframe added to globals.css; all nav links wired (sign-in, register, #features, #pricing anchors); fully responsive (Completed)
 - **Favorites Page** - /favorites route (auth-protected) with compact monospace list; separate Items and Collections sections with counts; FavoriteItemRow opens ItemDrawer on click; FavoriteCollectionRow links to /collections/[id]; empty state; sorted by updatedAt desc; toggleItemFavorite db query with ownership check; toggleItemFavorite server action with auth guard; Favorite button in ItemDrawer wired with optimistic local state (syncs on item load, flips instantly, reverts on error), toast on success/error, router.refresh(); "View all favorites" link added to sidebar under Collections > Favorites sub-section; TopBar star button removed (Completed)
 - **Pinned Items** - toggleItemPin db query with ownership check; toggleItemPin server action with auth guard; Pin button in ItemDrawer wired with optimistic local state (synced on item load, flips instantly, reverts on error), toast on success/error, router.refresh() syncs list; pinned-first sort in getItemsByType and dashboard getDashboardPinnedItems were already correct (Completed)
 - **Homepage Mockup** - Standalone marketing prototype at prototypes/homepage/ (index.html, styles.css, script.js); hero with animated chaos-to-order visual (8 floating icons bounce off walls + mouse repel via requestAnimationFrame), pulsing arrow, mini dashboard preview with colored item cards; fixed nav turns frosted glass on scroll, mobile hamburger menu; 6-card features grid with type accent colors + hover top-border reveal; AI section with code editor mockup and AI tag demo; pricing with monthly/yearly toggle ($8/mo → $6/mo billed $72/yr); CTA and footer; scroll fade-ins via IntersectionObserver; responsive mobile stack with 90° arrow rotation (Completed)
