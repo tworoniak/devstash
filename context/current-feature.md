@@ -1,41 +1,16 @@
-# Current Feature: Import / Export
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- "Export JSON" button on /settings Data section downloads `devstash-export-{date}.json` with all user items, collections, and tags
-- "Export ZIP" button (PRO) downloads a ZIP with the JSON manifest + actual files from R2
-- "Import from JSON" button opens a dialog with a file drop zone, preview summary, duplicate-skip option, and progress indicator
-- Import server action validates JSON via Zod, creates collections → items → tags in a Prisma transaction
-- Free tier limits enforced during import (50 items / 3 collections); file/image items skipped for free users
-- Duplicate detection on title + type + content/URL match
-- Unit tests for export and import server actions
-
 ## Notes
-
-- New "Data" section added to `/settings` page between Billing (future) and Account sections
-- Export format includes `version: 1` and `exportedAt` timestamp for future migrations
-- File/image items export metadata only (fileName, fileSize) — not actual files — in JSON export
-- ZIP export streams actual R2 files into a `/files` directory alongside the JSON manifest
-- Import dialog reuses FileUpload drag-and-drop pattern; shows counts by type after parse (e.g. "8 snippets, 6 prompts")
-- "Skip duplicates" checkbox checked by default; match on title + type + content hash
-
-### Files Involved
-
-- `src/components/settings/DataSettings.tsx` — new settings section component
-- `src/app/(dashboard)/settings/page.tsx` — add DataSettings
-- `src/actions/export.ts` — exportData server action
-- `src/actions/import.ts` — importData server action with Zod validation
-- `src/app/api/export/route.ts` — GET route that streams JSON/ZIP download
-- `src/lib/db/export.ts` — query to fetch all user data for export
-- `src/components/settings/ImportDialog.tsx` — import modal with preview and progress
-- Unit tests for export/import actions
 
 ## History
 
+- **Import / Export** - New "Data" section on /settings page with Export JSON button (downloads `devstash-export-{date}.json` via GET /api/export), Export ZIP button (PRO, disabled, bundles R2 files via fflate), and Import from JSON button; ImportDialog component with drag-and-drop file drop zone, client-side FileReader, previewImport server action shows item counts by type + collection/tag counts, skipDuplicates toggle (default on, matches title+type+content/URL), importData server action validates via Zod ExportSchema, creates collections→items→tags in a Prisma transaction, enforces free tier limits (50 items / 3 collections), skips file/image items for free users; ExportSchema extracted to src/lib/import-schema.ts for shared use in tests; 13 unit tests across import.test.ts and export.test.ts (Completed)
 - **Editor Preferences Settings** - Editor preferences section added to /settings page with theme dropdown (vs-dark, monokai, github-dark), font size dropdown, tab size dropdown, word wrap toggle (default: on), and minimap toggle (default: off); all controls auto-save on change with a success toast; `editorPreferences` JSON column added to User model with Prisma migration; Zod schema + type in src/lib/editor-preferences.ts; updateEditorPreferences server action in src/actions/editor-preferences.ts; EditorPreferencesProvider context (src/contexts/editor-preferences-context.tsx) wraps DashboardShell so CodeEditor can read preferences without prop drilling; monokai + github-dark themes defined in src/lib/monaco-themes.ts and registered via Monaco's beforeMount; all 7 dashboard layouts fetch and pass initialEditorPreferences (Completed)
 - **Settings Page** - /settings route (auth-protected, dashboard shell) with Change Password (email/password users only) and Delete Account (AlertDialog confirmation) sections moved from /profile; Settings link added to sidebar user dropdown between Profile and theme toggle; profile page now shows user info and usage stats only; no new API routes needed (Completed)
 - **Global Search / Command Palette** - Cmd+K / Ctrl+K opens a command palette from anywhere in the dashboard; GET /api/search endpoint returns all user items (id, title, typeIcon, typeColor, typeName) and collections (id, name, itemCount); SearchPalette component (src/components/search/search-palette.tsx) uses shadcn cmdk CommandDialog + Command wrapper for context, pre-fetches data on mount, groups results into Items and Collections sections with a separator, client-side fuzzy filtering via cmdk; selecting an item closes palette and opens ItemDrawer, selecting a collection routes to /collections/[id]; DashboardShell wires Cmd+K global keydown listener, moves ItemDrawerProvider to wrap full shell so SearchPalette can call useItemDrawer; TopBar search input and mobile search button both call onSearchOpen; placeholder updated to show ⌘K hint (Completed)
