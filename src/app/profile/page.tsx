@@ -3,8 +3,6 @@ import { redirect } from 'next/navigation';
 import { getUserProfile, getProfileStats } from '@/lib/db/users';
 import { ICON_MAP } from '@/lib/constants/icon-map';
 import { UserAvatar } from '@/components/shared/user-avatar';
-import { ChangePasswordForm } from '@/components/profile/change-password-form';
-import { DeleteAccountDialog } from '@/components/profile/delete-account-dialog';
 import { Code } from 'lucide-react';
 
 export default async function ProfilePage() {
@@ -85,31 +83,6 @@ export default async function ProfilePage() {
         </div>
       </section>
 
-      {/* Change Password — only for email/password users */}
-      {profile.hasPassword && (
-        <section className='bg-card border border-border rounded-lg p-6 space-y-4'>
-          <h2 className='text-sm font-semibold text-foreground uppercase tracking-wide'>
-            Change Password
-          </h2>
-          <ChangePasswordForm />
-        </section>
-      )}
-
-      {/* Danger Zone */}
-      <section className='bg-card border border-destructive/30 rounded-lg p-6 space-y-4'>
-        <h2 className='text-sm font-semibold text-destructive uppercase tracking-wide'>
-          Danger Zone
-        </h2>
-        <div className='flex items-center justify-between'>
-          <div>
-            <p className='text-sm font-medium text-foreground'>Delete account</p>
-            <p className='text-xs text-muted-foreground mt-0.5'>
-              Permanently delete your account and all data.
-            </p>
-          </div>
-          <DeleteAccountDialog />
-        </div>
-      </section>
     </div>
   );
 }

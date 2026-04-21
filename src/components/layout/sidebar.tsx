@@ -9,6 +9,7 @@ import {
   ChevronRight,
   LogOut,
   User,
+  Settings,
   LayoutDashboard,
   Pin,
   Clock,
@@ -319,6 +320,15 @@ export function SidebarContent({
               >
                 <User className='h-4 w-4' />
                 Profile
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem className='p-0'>
+              <Link
+                href='/settings'
+                className='flex w-full items-center gap-2 px-1.5 py-1 cursor-pointer'
+              >
+                <Settings className='h-4 w-4' />
+                Settings
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />

@@ -1,15 +1,29 @@
-# Current Feature
+# Current Feature: Settings Page
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Create a `/settings` route protected by auth
+- Settings page lives within the dashboard shell (sidebar + topbar)
+- Add a "Settings" link in the user icon dropdown at the bottom of the sidebar
+- Move "Delete Account" and "Change Password" actions from the profile page to the settings page
+- Profile page retains user info and usage stats only (no account actions)
+
 ## Notes
+
+- The user dropdown at the bottom of the sidebar currently has Profile and Sign Out links — add Settings between Profile and Sign Out (or above Profile)
+- Settings page should use the same layout pattern as other dashboard pages (auth check, sidebar shell)
+- The delete account flow uses an AlertDialog confirmation — preserve this behavior on the settings page
+- Change password is only shown to email/password users (not OAuth-only users) — preserve this condition
+- The API endpoints for password change (`/api/user/change-password`) and account deletion (`/api/user/delete-account`) already exist; no new API routes needed
+- Keep the profile page at `/profile` but strip out the account action sections
 
 ## History
 
+- **Global Search / Command Palette** - Cmd+K / Ctrl+K opens a command palette from anywhere in the dashboard; GET /api/search endpoint returns all user items (id, title, typeIcon, typeColor, typeName) and collections (id, name, itemCount); SearchPalette component (src/components/search/search-palette.tsx) uses shadcn cmdk CommandDialog + Command wrapper for context, pre-fetches data on mount, groups results into Items and Collections sections with a separator, client-side fuzzy filtering via cmdk; selecting an item closes palette and opens ItemDrawer, selecting a collection routes to /collections/[id]; DashboardShell wires Cmd+K global keydown listener, moves ItemDrawerProvider to wrap full shell so SearchPalette can call useItemDrawer; TopBar search input and mobile search button both call onSearchOpen; placeholder updated to show ⌘K hint (Completed)
 - **Collection Actions** - Edit/Delete/Favorite buttons added to /collections/[id] header (CollectionHeader client component); EditCollectionDialog shared component for name+description edits; delete shows AlertDialog confirmation and redirects to /collections on success (items preserved, join rows cascade); Favorite renders as disabled no-op; CollectionCard restructured with 3-dots DropdownMenu (Edit/Delete/Favorite) — card body navigates via router.push to avoid nested link issues; updateCollection and deleteCollection db queries + server actions with ownership checks (Completed)
 - **Collections Index Page & Dashboard Auth Fix** - /collections page added (src/app/collections/page.tsx) listing all user collections in a 3-col grid using CollectionCard with empty state; getAllCollections db query added to src/lib/db/collections.ts (same shape as getDashboardCollections, no limit, ordered by name); StatsSection and CollectionsSection fixed to use auth() session instead of hardcoded demo@devstash.io user — dashboard now shows authenticated user's stats and collections, collection card links no longer 404 (Completed)
 - **Item Collection Assignment** - Multi-select collection picker added to New Item dialog and Item Drawer edit mode; getUserCollections db query in src/lib/db/collections.ts + server action in src/actions/collections.ts (auth-guarded); createItem and updateItem db queries extended with optional collectionIds (create wires join table on create, update does deleteMany+create to fully sync); CollectionSelector component at src/components/shared/collection-selector.tsx (scrollable checkbox list, max-h-36, empty state); Checkbox shadcn component added; NewItemDialog fetches collections on open, resets selection on close; ItemDrawer edit mode replaces static badge list with live CollectionSelector initialized from item.collections, passes collectionIds to updateItem on save (Completed)
