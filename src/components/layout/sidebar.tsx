@@ -51,7 +51,7 @@ function SectionHeader({
   return (
     <button
       onClick={onToggle}
-      className='flex w-full items-center justify-between px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors'
+      className='flex w-full items-center justify-between px-3 py-1 text-xs uppercase font-medium text-muted-foreground hover:text-foreground transition-colors'
     >
       <span>{label}</span>
       <ChevronDown
@@ -67,7 +67,11 @@ interface SidebarContentProps {
   user: SidebarUser | null;
 }
 
-export function SidebarContent({ collapsed = false, sidebarData, user }: SidebarContentProps) {
+export function SidebarContent({
+  collapsed = false,
+  sidebarData,
+  user,
+}: SidebarContentProps) {
   const [typesOpen, setTypesOpen] = useState(true);
   const [collectionsOpen, setCollectionsOpen] = useState(true);
 
@@ -180,12 +184,15 @@ export function SidebarContent({ collapsed = false, sidebarData, user }: Sidebar
                           href={`/collections/${col.id}`}
                           className='flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors'
                         >
-                          <Folder className='h-3.5 w-3.5 shrink-0 text-muted-foreground/50' />
+                          <Folder
+                            className='h-3.5 w-3.5 shrink-0 text-muted-foreground/50'
+                            style={{ color: col.accentColor }}
+                          />
                           <span className='flex-1 truncate'>{col.name}</span>
-                          <span
+                          {/* <span
                             className='h-2 w-2 rounded-full shrink-0'
                             style={{ backgroundColor: col.accentColor }}
-                          />
+                          /> */}
                         </Link>
                       ))}
                     </nav>
@@ -283,5 +290,7 @@ export function MobileSidebarContent({
   sidebarData: SidebarData | null;
   user: SidebarUser | null;
 }) {
-  return <SidebarContent collapsed={false} sidebarData={sidebarData} user={user} />;
+  return (
+    <SidebarContent collapsed={false} sidebarData={sidebarData} user={user} />
+  );
 }

@@ -230,6 +230,32 @@ export interface CollectionDetail {
   accentColor: string;
 }
 
+export async function updateCollection(
+  id: string,
+  userId: string,
+  data: { name: string; description?: string | null }
+): Promise<CreatedCollection | null> {
+  const existing = await prisma.collection.findFirst({ where: { id, userId }, select: { id: true } });
+  if (!existing) return null;
+
+  return prisma.collection.update({
+    where: { id },
+    data: {
+      name: data.name,
+      description: data.description ?? null,
+    },
+    select: { id: true, name: true, description: true },
+  });
+}
+
+export async function deleteCollection(id: string, userId: string): Promise<boolean> {
+  const existing = await prisma.collection.findFirst({ where: { id, userId }, select: { id: true } });
+  if (!existing) return false;
+
+  await prisma.collection.delete({ where: { id } });
+  return true;
+}
+
 export async function getCollectionWithItems(
   id: string,
   userId: string,

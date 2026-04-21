@@ -7,7 +7,7 @@ import { ItemRow } from '@/components/dashboard/item-row';
 import { ImageThumbnailCard } from '@/components/items/image-thumbnail-card';
 import { FileListRow } from '@/components/items/file-list-row';
 import { Pagination } from '@/components/shared/pagination';
-import { Star } from 'lucide-react';
+import { CollectionHeader } from '@/components/collections/collection-header';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -34,20 +34,7 @@ export default async function CollectionPage({ params, searchParams }: PageProps
 
   return (
     <div className="space-y-6">
-      <div>
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight">{collection.name}</h1>
-          {collection.isFavorite && (
-            <Star className="h-4 w-4 fill-amber-400 text-amber-400 shrink-0" />
-          )}
-        </div>
-        {collection.description && (
-          <p className="text-sm text-muted-foreground mt-1">{collection.description}</p>
-        )}
-        <p className="text-sm text-muted-foreground mt-1">
-          {total} {total === 1 ? 'item' : 'items'}
-        </p>
-      </div>
+      <CollectionHeader collection={collection} itemCount={total} />
 
       {items.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">

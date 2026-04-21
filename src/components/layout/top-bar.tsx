@@ -18,7 +18,14 @@ interface TopBarProps {
   onNewCollection: () => void;
 }
 
-export function TopBar({ sidebarOpen, onSidebarToggle, sidebarData, user, onNewItem, onNewCollection }: TopBarProps) {
+export function TopBar({
+  sidebarOpen,
+  onSidebarToggle,
+  sidebarData,
+  user,
+  onNewItem,
+  onNewCollection,
+}: TopBarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -43,9 +50,7 @@ export function TopBar({ sidebarOpen, onSidebarToggle, sidebarData, user, onNewI
           <div className='w-7 h-7 rounded-md bg-blue-600 flex items-center justify-center text-white text-xs font-bold'>
             DS
           </div>
-          <span className='font-semibold text-sm hidden sm:block'>
-            DevStash
-          </span>
+          <span className='font-semibold text-sm hidden sm:block'>DevStak</span>
         </Link>
 
         {/* Sidebar toggle — desktop only */}

@@ -19,12 +19,15 @@ export async function PinnedSection() {
   if (items.length === 0) return null;
 
   return (
-    <section className="mb-6">
-      <div className="flex items-center gap-2 mb-2">
-        <Pin className="h-3.5 w-3.5 text-blue-400 fill-blue-400" />
-        <h2 className="text-sm font-semibold text-foreground">Pinned</h2>
+    <section className='mb-6'>
+      <div className='flex items-center gap-2 mb-2'>
+        <Pin className='h-3.5 w-3.5 text-blue-400 fill-blue-400' />
+        <h2 className='text-sm font-semibold text-foreground'>Pinned</h2>
+        <p className='text-xs text-muted-foreground'>
+          {items.length} {items.length === 1 ? 'item' : 'items'}
+        </p>
       </div>
-      <div className="flex flex-col gap-1">
+      <div className='flex flex-col gap-1'>
         {items.map((item) => (
           <ItemRow key={item.id} item={item} />
         ))}
