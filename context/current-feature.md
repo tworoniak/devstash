@@ -1,12 +1,38 @@
-# Current Feature
+# Current Feature: Import / Export
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- "Export JSON" button on /settings Data section downloads `devstash-export-{date}.json` with all user items, collections, and tags
+- "Export ZIP" button (PRO) downloads a ZIP with the JSON manifest + actual files from R2
+- "Import from JSON" button opens a dialog with a file drop zone, preview summary, duplicate-skip option, and progress indicator
+- Import server action validates JSON via Zod, creates collections → items → tags in a Prisma transaction
+- Free tier limits enforced during import (50 items / 3 collections); file/image items skipped for free users
+- Duplicate detection on title + type + content/URL match
+- Unit tests for export and import server actions
+
 ## Notes
+
+- New "Data" section added to `/settings` page between Billing (future) and Account sections
+- Export format includes `version: 1` and `exportedAt` timestamp for future migrations
+- File/image items export metadata only (fileName, fileSize) — not actual files — in JSON export
+- ZIP export streams actual R2 files into a `/files` directory alongside the JSON manifest
+- Import dialog reuses FileUpload drag-and-drop pattern; shows counts by type after parse (e.g. "8 snippets, 6 prompts")
+- "Skip duplicates" checkbox checked by default; match on title + type + content hash
+
+### Files Involved
+
+- `src/components/settings/DataSettings.tsx` — new settings section component
+- `src/app/(dashboard)/settings/page.tsx` — add DataSettings
+- `src/actions/export.ts` — exportData server action
+- `src/actions/import.ts` — importData server action with Zod validation
+- `src/app/api/export/route.ts` — GET route that streams JSON/ZIP download
+- `src/lib/db/export.ts` — query to fetch all user data for export
+- `src/components/settings/ImportDialog.tsx` — import modal with preview and progress
+- Unit tests for export/import actions
 
 ## History
 
