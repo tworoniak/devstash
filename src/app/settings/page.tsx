@@ -4,6 +4,7 @@ import { getUserProfile } from '@/lib/db/users';
 import { ChangePasswordForm } from '@/components/profile/change-password-form';
 import { DeleteAccountDialog } from '@/components/profile/delete-account-dialog';
 import { EditorPreferencesForm } from '@/components/settings/editor-preferences-form';
+import { DataSettings } from '@/components/settings/DataSettings';
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -24,6 +25,12 @@ export default async function SettingsPage() {
           Editor Preferences
         </h2>
         <EditorPreferencesForm />
+      </section>
+
+      {/* Data — Export / Import */}
+      <section className='bg-card border border-border rounded-lg p-6 space-y-4'>
+        <h2 className='text-sm font-semibold text-foreground uppercase tracking-wide'>Data</h2>
+        <DataSettings />
       </section>
 
       {/* Change Password — only for email/password users */}
