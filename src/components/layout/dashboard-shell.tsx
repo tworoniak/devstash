@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TopBar } from '@/components/layout/top-bar';
 import { Sidebar } from '@/components/layout/sidebar';
 import { ItemDrawerProvider } from '@/components/items/item-drawer-provider';
 import { NewItemDialog } from '@/components/items/new-item-dialog';
+import { SearchPalette } from '@/components/search/search-palette';
 import type { SidebarData, SidebarUser } from '@/components/layout/sidebar';
 
 interface DashboardShellProps {
@@ -16,23 +17,37 @@ interface DashboardShellProps {
 export function DashboardShell({ children, sidebarData, user }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [newItemOpen, setNewItemOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen((prev) => !prev);
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
-    <div className='flex h-screen overflow-hidden'>
-      <Sidebar open={sidebarOpen} sidebarData={sidebarData} user={user} />
-      <div className='flex flex-col flex-1 overflow-hidden'>
-        <TopBar
-          sidebarOpen={sidebarOpen}
-          onSidebarToggle={() => setSidebarOpen(!sidebarOpen)}
-          sidebarData={sidebarData}
-          user={user}
-          onNewItem={() => setNewItemOpen(true)}
-        />
-        <main className='flex-1 overflow-y-auto p-6'>
-          <ItemDrawerProvider>{children}</ItemDrawerProvider>
-        </main>
+    <ItemDrawerProvider>
+      <div className='flex h-screen overflow-hidden'>
+        <Sidebar open={sidebarOpen} sidebarData={sidebarData} user={user} />
+        <div className='flex flex-col flex-1 overflow-hidden'>
+          <TopBar
+            sidebarOpen={sidebarOpen}
+            onSidebarToggle={() => setSidebarOpen(!sidebarOpen)}
+            sidebarData={sidebarData}
+            user={user}
+            onNewItem={() => setNewItemOpen(true)}
+            onSearchOpen={() => setSearchOpen(true)}
+          />
+          <main className='flex-1 overflow-y-auto p-6'>{children}</main>
+        </div>
+        <NewItemDialog open={newItemOpen} onOpenChange={setNewItemOpen} />
+        <SearchPalette open={searchOpen} onOpenChange={setSearchOpen} />
       </div>
-      <NewItemDialog open={newItemOpen} onOpenChange={setNewItemOpen} />
-    </div>
+    </ItemDrawerProvider>
   );
 }

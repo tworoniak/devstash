@@ -1,6 +1,12 @@
 'use client';
 
-import { Search, Plus, Menu, PanelLeft } from 'lucide-react';
+import {
+  Search,
+  Plus,
+  Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
@@ -14,6 +20,7 @@ interface TopBarProps {
   sidebarData: SidebarData | null;
   user: SidebarUser | null;
   onNewItem: () => void;
+  onSearchOpen: () => void;
 }
 
 export function TopBar({
@@ -22,6 +29,7 @@ export function TopBar({
   sidebarData,
   user,
   onNewItem,
+  onSearchOpen,
 }: TopBarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -44,11 +52,15 @@ export function TopBar({
           <Button
             variant='ghost'
             size='icon'
-            className='text-muted-foreground hover:text-foreground h-8 w-8'
+            className='text-muted-foreground hover:text-foreground h-10 w-10 rounded-none'
             onClick={onSidebarToggle}
             aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
           >
-            <PanelLeft className='h-4 w-4' />
+            {sidebarOpen ? (
+              <PanelLeftClose size={24} />
+            ) : (
+              <PanelLeftOpen size={24} />
+            )}
           </Button>
         </div>
 
@@ -58,6 +70,7 @@ export function TopBar({
           size='icon'
           className='lg:hidden text-muted-foreground'
           aria-label='Search'
+          onClick={onSearchOpen}
         >
           <Search className='h-5 w-5' />
         </Button>
@@ -67,13 +80,11 @@ export function TopBar({
           <div className='relative pointer-events-auto'>
             <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
             <Input
-              placeholder='Search or jump to...'
-              className='pl-9 bg-muted/30 border-border text-sm h-9'
+              placeholder='Search items and collections... ⌘K'
+              className='pl-9 bg-muted/30 border-border text-sm h-9 cursor-pointer'
               readOnly
+              onClick={onSearchOpen}
             />
-            <kbd className='absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/60 bg-muted/50 px-1.5 py-0.5 rounded border border-border'>
-              ⌘K
-            </kbd>
           </div>
         </div>
 
