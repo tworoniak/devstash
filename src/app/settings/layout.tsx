@@ -2,6 +2,7 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { getSidebarItemTypes, getSidebarCounts } from '@/lib/db/items';
 import { getSidebarFavoriteCollections, getSidebarRecentCollections } from '@/lib/db/collections';
+import { getEditorPreferences } from '@/lib/db/users';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import type { SidebarData } from '@/components/layout/sidebar';
 
@@ -36,8 +37,10 @@ export default async function SettingsLayout({
     image: session.user.image ?? null,
   };
 
+  const initialEditorPreferences = await getEditorPreferences(userId);
+
   return (
-    <DashboardShell sidebarData={sidebarData} user={user}>
+    <DashboardShell sidebarData={sidebarData} user={user} initialEditorPreferences={initialEditorPreferences}>
       {children}
     </DashboardShell>
   );

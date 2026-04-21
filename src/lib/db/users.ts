@@ -1,4 +1,6 @@
 import { prisma } from '@/lib/prisma';
+import type { EditorPreferences } from '@/lib/editor-preferences';
+import { DEFAULT_EDITOR_PREFERENCES } from '@/lib/editor-preferences';
 
 export interface UserProfile {
   id: string;
@@ -21,6 +23,24 @@ export interface ProfileStats {
   totalItems: number;
   totalCollections: number;
   itemTypeCounts: ProfileItemTypeStat[];
+}
+
+export async function getEditorPreferences(userId: string): Promise<EditorPreferences> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { editorPreferences: true },
+  });
+  if (!user?.editorPreferences) return DEFAULT_EDITOR_PREFERENCES;
+  const raw = user.editorPreferences as Record<string, unknown>;
+  return {
+    fontSize: typeof raw.fontSize === 'number' ? raw.fontSize : DEFAULT_EDITOR_PREFERENCES.fontSize,
+    tabSize: typeof raw.tabSize === 'number' ? raw.tabSize : DEFAULT_EDITOR_PREFERENCES.tabSize,
+    wordWrap: typeof raw.wordWrap === 'boolean' ? raw.wordWrap : DEFAULT_EDITOR_PREFERENCES.wordWrap,
+    minimap: typeof raw.minimap === 'boolean' ? raw.minimap : DEFAULT_EDITOR_PREFERENCES.minimap,
+    theme: (raw.theme === 'vs-dark' || raw.theme === 'monokai' || raw.theme === 'github-dark')
+      ? raw.theme
+      : DEFAULT_EDITOR_PREFERENCES.theme,
+  };
 }
 
 export async function getUserProfile(userId: string): Promise<UserProfile | null> {

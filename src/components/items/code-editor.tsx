@@ -1,9 +1,11 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import Editor from '@monaco-editor/react';
+import Editor, { type BeforeMount } from '@monaco-editor/react';
 import { Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useEditorPreferences } from '@/contexts/editor-preferences-context';
+import { MONACO_THEMES } from '@/lib/monaco-themes';
 
 const MAC_DOTS = [
   { color: '#ff5f57', label: 'close' },
@@ -28,9 +30,16 @@ interface CodeEditorProps {
   onChange?: (value: string) => void;
 }
 
+const handleBeforeMount: BeforeMount = (monaco) => {
+  for (const [name, theme] of Object.entries(MONACO_THEMES)) {
+    monaco.editor.defineTheme(name, theme);
+  }
+};
+
 export function CodeEditor({ value, language, readOnly = false, onChange }: CodeEditorProps) {
   const [copied, setCopied] = useState(false);
   const [editorHeight, setEditorHeight] = useState(() => computeEditorHeight(value));
+  const { preferences } = useEditorPreferences();
 
   const handleChange = useCallback(
     (newValue: string | undefined) => {
@@ -92,15 +101,17 @@ export function CodeEditor({ value, language, readOnly = false, onChange }: Code
         <Editor
           value={value}
           language={displayLanguage}
-          theme="vs-dark"
+          theme={preferences.theme}
+          beforeMount={handleBeforeMount}
           onChange={readOnly ? undefined : handleChange}
           options={{
             readOnly,
-            fontSize: 13,
+            fontSize: preferences.fontSize,
+            tabSize: preferences.tabSize,
             lineHeight: LINE_HEIGHT,
-            minimap: { enabled: false },
+            minimap: { enabled: preferences.minimap },
             scrollBeyondLastLine: false,
-            wordWrap: 'on',
+            wordWrap: preferences.wordWrap ? 'on' : 'off',
             folding: false,
             lineNumbers: 'on',
             renderLineHighlight: readOnly ? 'none' : 'line',
