@@ -1,36 +1,16 @@
-# Current Feature: Collection Actions
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- `/collections/[id]` page has Edit, Delete, and Favorite buttons in the header action bar
-  - Favorite button: renders (Star icon) but is a no-op for now (no backend wiring)
-  - Edit button: opens a modal to edit collection name and description, calls `updateCollection` server action, toasts on success/error, `router.refresh()`
-  - Delete button: opens an AlertDialog confirmation; on confirm calls `deleteCollection` server action; on success redirects to `/collections`; items are **NOT** deleted — only the join table rows are removed (cascade handled by DB schema)
-- `CollectionCard` (used on `/collections` and `/dashboard`) has a functional 3-dots dropdown menu
-  - The card body (clicking anywhere except the dropdown) navigates to `/collections/[id]`
-  - The 3-dots button stops propagation and opens a `DropdownMenu` with three items: Edit, Delete, Favorite
-  - Edit opens an edit modal inline in the card (or shared dialog component)
-  - Delete opens an AlertDialog confirmation
-  - Favorite: renders but is a no-op for now
-
 ## Notes
-
-- New server actions needed: `updateCollection`, `deleteCollection` in `src/actions/collections.ts`
-- New db queries needed: `updateCollection`, `deleteCollection` in `src/lib/db/collections.ts`
-  - `deleteCollection` must verify ownership before deleting; when the collection is deleted, `ItemCollection` rows are removed via cascade (already set up in schema) — items themselves are **not** touched
-- New shared component: `EditCollectionDialog` at `src/components/collections/edit-collection-dialog.tsx`
-  - Accepts `collection: { id, name, description }`, `open`, `onOpenChange`; same form fields as `NewCollectionDialog`
-  - Used from both `/collections/[id]` page header and `CollectionCard` dropdown
-- The `CollectionCard` currently wraps the entire card in `<Link>`. Restructure it: remove the outer `<Link>`, make the card div itself a clickable container that calls `router.push`, and leave the dropdown button with `stopPropagation`. This avoids nested interactive element issues.
-- Shadcn `DropdownMenu` component is already available; check if it needs to be added via CLI first
-- Shadcn `AlertDialog` is already used in the item drawer for delete confirmation — same pattern applies here
 
 ## History
 
+- **Collection Actions** - Edit/Delete/Favorite buttons added to /collections/[id] header (CollectionHeader client component); EditCollectionDialog shared component for name+description edits; delete shows AlertDialog confirmation and redirects to /collections on success (items preserved, join rows cascade); Favorite renders as disabled no-op; CollectionCard restructured with 3-dots DropdownMenu (Edit/Delete/Favorite) — card body navigates via router.push to avoid nested link issues; updateCollection and deleteCollection db queries + server actions with ownership checks (Completed)
 - **Collections Index Page & Dashboard Auth Fix** - /collections page added (src/app/collections/page.tsx) listing all user collections in a 3-col grid using CollectionCard with empty state; getAllCollections db query added to src/lib/db/collections.ts (same shape as getDashboardCollections, no limit, ordered by name); StatsSection and CollectionsSection fixed to use auth() session instead of hardcoded demo@devstash.io user — dashboard now shows authenticated user's stats and collections, collection card links no longer 404 (Completed)
 - **Item Collection Assignment** - Multi-select collection picker added to New Item dialog and Item Drawer edit mode; getUserCollections db query in src/lib/db/collections.ts + server action in src/actions/collections.ts (auth-guarded); createItem and updateItem db queries extended with optional collectionIds (create wires join table on create, update does deleteMany+create to fully sync); CollectionSelector component at src/components/shared/collection-selector.tsx (scrollable checkbox list, max-h-36, empty state); Checkbox shadcn component added; NewItemDialog fetches collections on open, resets selection on close; ItemDrawer edit mode replaces static badge list with live CollectionSelector initialized from item.collections, passes collectionIds to updateItem on save (Completed)
 - **Collection Create** - "New Collection" button in TopBar opens a modal dialog; fields: name (required) + description (optional); createCollection db query in src/lib/db/collections.ts; createCollection server action in src/actions/collections.ts with auth guard and Zod validation; NewCollectionDialog component at src/components/collections/new-collection-dialog.tsx; onNewCollection prop added to TopBar and wired in DashboardShell alongside NewItemDialog; toast on success/failure; router.refresh() syncs sidebar and dashboard (Completed)
