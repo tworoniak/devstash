@@ -1,6 +1,6 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
-import { getSidebarItemTypes } from '@/lib/db/items';
+import { getSidebarItemTypes, getSidebarCounts } from '@/lib/db/items';
 import { getSidebarFavoriteCollections, getSidebarRecentCollections } from '@/lib/db/collections';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import type { SidebarData } from '@/components/layout/sidebar';
@@ -19,12 +19,13 @@ export default async function DashboardLayout({
   let sidebarData: SidebarData | null = null;
 
   try {
-    const [itemTypes, favoriteCollections, recentCollections] = await Promise.all([
+    const [itemTypes, favoriteCollections, recentCollections, { pinnedCount, favoritesCount }] = await Promise.all([
       getSidebarItemTypes(userId),
       getSidebarFavoriteCollections(userId),
       getSidebarRecentCollections(userId),
+      getSidebarCounts(userId),
     ]);
-    sidebarData = { itemTypes, favoriteCollections, recentCollections };
+    sidebarData = { itemTypes, favoriteCollections, recentCollections, pinnedCount, favoritesCount };
   } catch (err) {
     console.error('Failed to load sidebar data:', err);
   }

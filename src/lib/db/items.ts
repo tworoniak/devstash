@@ -320,6 +320,32 @@ export interface FavoriteItem {
   };
 }
 
+export interface SidebarCounts {
+  pinnedCount: number;
+  favoritesCount: number;
+}
+
+export async function getSidebarCounts(userId: string): Promise<SidebarCounts> {
+  const [pinnedCount, favoritesCount] = await Promise.all([
+    prisma.item.count({ where: { userId, isPinned: true } }),
+    prisma.item.count({ where: { userId, isFavorite: true } }),
+  ]);
+  return { pinnedCount, favoritesCount };
+}
+
+export async function getPinnedItems(userId: string): Promise<FavoriteItem[]> {
+  return prisma.item.findMany({
+    where: { userId, isPinned: true },
+    orderBy: { updatedAt: 'desc' },
+    select: {
+      id: true,
+      title: true,
+      updatedAt: true,
+      itemType: { select: { name: true, icon: true, color: true } },
+    },
+  });
+}
+
 export async function getFavoriteItems(userId: string): Promise<FavoriteItem[]> {
   return prisma.item.findMany({
     where: { userId, isFavorite: true },

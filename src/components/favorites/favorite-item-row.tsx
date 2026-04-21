@@ -25,18 +25,24 @@ export function FavoriteItemRow({ item }: FavoriteItemRowProps) {
 
   return (
     <div
-      className='flex items-center gap-3 px-3 py-2 rounded hover:bg-accent/40 transition-colors cursor-pointer group'
+      className='flex items-center gap-3 p-3 rounded-lg bg-card border border-border hover:bg-accent/50 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 cursor-pointer'
+      style={{ borderLeftColor: color, borderLeftWidth: '3px' }}
       onClick={() => openDrawer(item.id)}
     >
-      <Icon className='h-3.5 w-3.5 shrink-0' style={{ color }} />
-      <span className='flex-1 text-sm text-foreground truncate font-mono'>{item.title}</span>
+      <div
+        className='h-8 w-8 rounded-md flex items-center justify-center shrink-0'
+        style={{ backgroundColor: `${color}18` }}
+      >
+        <Icon className='h-4 w-4' style={{ color }} />
+      </div>
+      <span className='flex-1 text-sm text-foreground truncate'>{item.title}</span>
       <span
         className='text-[10px] font-mono px-1.5 py-0.5 rounded shrink-0'
         style={{ color, backgroundColor: `${color}18` }}
       >
         {item.itemType.name}
       </span>
-      <span className='text-xs text-muted-foreground font-mono shrink-0 w-20 text-right'>
+      <span className='text-xs text-muted-foreground shrink-0 w-16 text-right'>
         {formatDate(item.updatedAt)}
       </span>
     </div>

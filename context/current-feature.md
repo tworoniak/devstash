@@ -1,12 +1,26 @@
-# Current Feature
+# Current Feature: Light / Dark Theme Toggle
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Install and configure `next-themes`
+- Remove the hardcoded `dark` class from `<html>` in `layout.tsx`
+- Add a `ThemeProvider` wrapping the app
+- Build a `ThemeToggle` component (Sun/Moon icon button) with hydration-safe mounted guard
+- Place the toggle in the sidebar user area
+- Fix `color-scheme` in `globals.css` so it follows the active theme
+- Verify light theme variables render correctly across all pages
+
 ## Notes
+
+- `next-themes` uses `attribute="class"` — fully compatible with Tailwind v4's `@custom-variant dark (&:is(.dark *))` setup
+- `defaultTheme="dark"` preserves the current default for existing users; `enableSystem` allows OS-level preference
+- `--sidebar-bg` already has both light and dark values defined — no extra token work needed
+- The `markdown-preview` class in `globals.css` uses hardcoded hex colors — will need scoping under `.dark` or light/dark variants
+- Homepage Navbar is a separate component; toggle is not required there unless requested
 
 ## History
 

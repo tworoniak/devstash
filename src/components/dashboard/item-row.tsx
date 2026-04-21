@@ -28,7 +28,7 @@ export function ItemRow({ item }: ItemRowProps) {
 
   return (
     <div
-      className="group flex items-start gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer border border-border"
+      className="group flex items-start gap-3 p-3 rounded-lg bg-card hover:bg-accent/50 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 cursor-pointer border border-border"
       style={{ borderLeftColor: color, borderLeftWidth: '3px' }}
       onClick={() => openDrawer(item.id)}
     >

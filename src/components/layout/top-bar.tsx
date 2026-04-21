@@ -1,7 +1,6 @@
 'use client';
 
-import Link from 'next/link';
-import { Search, Plus, FolderPlus, Menu, PanelLeft } from 'lucide-react';
+import { Search, Plus, Menu, PanelLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
@@ -15,7 +14,6 @@ interface TopBarProps {
   sidebarData: SidebarData | null;
   user: SidebarUser | null;
   onNewItem: () => void;
-  onNewCollection: () => void;
 }
 
 export function TopBar({
@@ -24,14 +22,13 @@ export function TopBar({
   sidebarData,
   user,
   onNewItem,
-  onNewCollection,
 }: TopBarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <>
-      <header className='h-14 border-b border-border bg-background flex items-center gap-3 px-4 shrink-0'>
-        {/* Mobile menu button */}
+      <header className='h-14 border-b border-border bg-background relative flex items-center gap-3 px-4 shrink-0'>
+        {/* Mobile menu button — hidden on desktop */}
         <Button
           variant='ghost'
           size='icon'
@@ -42,52 +39,46 @@ export function TopBar({
           <Menu className='h-5 w-5' />
         </Button>
 
-        {/* Logo */}
-        <Link
-          href={user ? '/dashboard' : '/sign-in'}
-          className='flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity'
-        >
-          <div className='w-7 h-7 rounded-md bg-blue-600 flex items-center justify-center text-white text-xs font-bold'>
-            DS
-          </div>
-          <span className='font-semibold text-sm hidden sm:block'>DevStak</span>
-        </Link>
+        {/* Sidebar collapse toggle — desktop only */}
+        <div className='hidden lg:flex items-center justify-center -ml-4 self-stretch border-r border-border px-3 mr-1'>
+          <Button
+            variant='ghost'
+            size='icon'
+            className='text-muted-foreground hover:text-foreground h-8 w-8'
+            onClick={onSidebarToggle}
+            aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+          >
+            <PanelLeft className='h-4 w-4' />
+          </Button>
+        </div>
 
-        {/* Sidebar toggle — desktop only */}
+        {/* Search icon — mobile only */}
         <Button
           variant='ghost'
           size='icon'
-          className='hidden lg:flex text-muted-foreground hover:text-foreground'
-          onClick={onSidebarToggle}
-          aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+          className='lg:hidden text-muted-foreground'
+          aria-label='Search'
         >
-          <PanelLeft className='h-4 w-4' />
+          <Search className='h-5 w-5' />
         </Button>
 
-        {/* Search */}
-        <div className='flex-1 max-w-xl relative'>
-          <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
-          <Input
-            placeholder='Search items...'
-            className='pl-9 bg-muted/30 border-border text-sm h-9'
-            readOnly
-          />
-          <kbd className='absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/60 bg-muted/50 px-1.5 py-0.5 rounded border border-border hidden sm:block'>
-            ⌘K
-          </kbd>
+        {/* Search — centered in header, desktop only */}
+        <div className='hidden lg:block absolute left-1/2 -translate-x-1/2 w-full max-w-md pointer-events-none'>
+          <div className='relative pointer-events-auto'>
+            <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
+            <Input
+              placeholder='Search or jump to...'
+              className='pl-9 bg-muted/30 border-border text-sm h-9'
+              readOnly
+            />
+            <kbd className='absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/60 bg-muted/50 px-1.5 py-0.5 rounded border border-border'>
+              ⌘K
+            </kbd>
+          </div>
         </div>
 
         {/* Actions */}
-        <div className='flex items-center gap-2 ml-auto shrink-0'>
-          <Button
-            variant='outline'
-            size='sm'
-            className='gap-1.5 text-sm hidden sm:flex border-border'
-            onClick={onNewCollection}
-          >
-            <FolderPlus className='h-4 w-4' />
-            New Collection
-          </Button>
+        <div className='flex items-center gap-2 ml-auto shrink-0 relative'>
           <Button size='sm' className='gap-1.5 text-sm' onClick={onNewItem}>
             <Plus className='h-4 w-4' />
             <span className='hidden sm:inline'>New Item</span>
@@ -99,7 +90,7 @@ export function TopBar({
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent
           side='left'
-          className='w-64 pl-0 pr-0 pb-0 pt-10 bg-background border-r border-border'
+          className='w-64 p-0 bg-sidebar-bg border-r border-border'
         >
           <SheetTitle className='sr-only'>Navigation</SheetTitle>
           <MobileSidebarContent sidebarData={sidebarData} user={user} />

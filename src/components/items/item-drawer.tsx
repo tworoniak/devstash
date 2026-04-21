@@ -441,7 +441,7 @@ export function ItemDrawer({ itemId, onClose }: ItemDrawerProps) {
   return (
     <>
     <Sheet open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
-      <SheetContent side="right" className="sm:max-w-xl overflow-y-auto p-0" showCloseButton>
+      <SheetContent side="right" className="sm:max-w-xl md:max-w-166.5 overflow-y-auto p-0" showCloseButton>
         {loading && <DrawerSkeleton />}
         {!loading && error && (
           <div className="flex items-center justify-center h-full p-8">

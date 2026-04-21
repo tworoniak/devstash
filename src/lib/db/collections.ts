@@ -103,8 +103,11 @@ export interface DashboardCollection {
   description: string | null;
   isFavorite: boolean;
   itemCount: number;
+  updatedAt: Date;
   accentColor: string;
   typeIcons: { icon: string; color: string }[];
+  typeBars: { color: string; percentage: number }[];
+  recentItems: { id: string; title: string; icon: string; color: string }[];
 }
 
 export interface FavoriteCollection {
@@ -132,12 +135,67 @@ export async function getFavoriteCollections(userId: string): Promise<FavoriteCo
   }));
 }
 
+type CollectionWithItems = {
+  id: string;
+  name: string;
+  description: string | null;
+  isFavorite: boolean;
+  updatedAt: Date;
+  items: {
+    addedAt: Date;
+    item: {
+      id: string;
+      title: string;
+      itemType: { id: string; icon: string; color: string };
+    };
+  }[];
+};
+
+function buildDashboardCollection(col: CollectionWithItems): DashboardCollection {
+  const typeCounts = new Map<string, { count: number; icon: string; color: string }>();
+  for (const { item } of col.items) {
+    const { id, icon, color } = item.itemType;
+    const existing = typeCounts.get(id);
+    if (existing) existing.count++;
+    else typeCounts.set(id, { count: 1, icon, color });
+  }
+
+  const sorted = Array.from(typeCounts.values()).sort((a, b) => b.count - a.count);
+  const total = col.items.length;
+  const accentColor = sorted[0]?.color ?? '#3b82f6';
+  const typeIcons = sorted.map(({ icon, color }) => ({ icon, color }));
+  const typeBars = sorted.map(({ color, count }) => ({
+    color,
+    percentage: total > 0 ? (count / total) * 100 : 0,
+  }));
+  const recentItems = col.items.slice(0, 3).map(({ item }) => ({
+    id: item.id,
+    title: item.title,
+    icon: item.itemType.icon,
+    color: item.itemType.color,
+  }));
+
+  return {
+    id: col.id,
+    name: col.name,
+    description: col.description,
+    isFavorite: col.isFavorite,
+    itemCount: total,
+    updatedAt: col.updatedAt,
+    accentColor,
+    typeIcons,
+    typeBars,
+    recentItems,
+  };
+}
+
 export async function getAllCollections(userId: string): Promise<DashboardCollection[]> {
   const collections = await prisma.collection.findMany({
     where: { userId },
     orderBy: { name: 'asc' },
     include: {
       items: {
+        orderBy: { addedAt: 'desc' },
         include: {
           item: {
             include: { itemType: true },
@@ -147,41 +205,17 @@ export async function getAllCollections(userId: string): Promise<DashboardCollec
     },
   });
 
-  return collections.map((col) => {
-    const typeCounts = new Map<string, { count: number; icon: string; color: string }>();
-    for (const { item } of col.items) {
-      const { id, icon, color } = item.itemType;
-      const existing = typeCounts.get(id);
-      if (existing) {
-        existing.count++;
-      } else {
-        typeCounts.set(id, { count: 1, icon, color });
-      }
-    }
-
-    const sorted = Array.from(typeCounts.values()).sort((a, b) => b.count - a.count);
-    const accentColor = sorted[0]?.color ?? '#3b82f6';
-    const typeIcons = sorted.map(({ icon, color }) => ({ icon, color }));
-
-    return {
-      id: col.id,
-      name: col.name,
-      description: col.description,
-      isFavorite: col.isFavorite,
-      itemCount: col.items.length,
-      accentColor,
-      typeIcons,
-    };
-  });
+  return collections.map((col) => buildDashboardCollection(col));
 }
 
 export async function getDashboardCollections(userId: string): Promise<DashboardCollection[]> {
   const collections = await prisma.collection.findMany({
     where: { userId },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { updatedAt: 'desc' },
     take: DASHBOARD_COLLECTIONS_LIMIT,
     include: {
       items: {
+        orderBy: { addedAt: 'desc' },
         include: {
           item: {
             include: { itemType: true },
@@ -191,35 +225,7 @@ export async function getDashboardCollections(userId: string): Promise<Dashboard
     },
   });
 
-  return collections.map((col) => {
-    // Count items per type
-    const typeCounts = new Map<string, { count: number; icon: string; color: string }>();
-    for (const { item } of col.items) {
-      const { id, icon, color } = item.itemType;
-      const existing = typeCounts.get(id);
-      if (existing) {
-        existing.count++;
-      } else {
-        typeCounts.set(id, { count: 1, icon, color });
-      }
-    }
-
-    // Sort by count descending
-    const sorted = Array.from(typeCounts.values()).sort((a, b) => b.count - a.count);
-
-    const accentColor = sorted[0]?.color ?? '#3b82f6';
-    const typeIcons = sorted.map(({ icon, color }) => ({ icon, color }));
-
-    return {
-      id: col.id,
-      name: col.name,
-      description: col.description,
-      isFavorite: col.isFavorite,
-      itemCount: col.items.length,
-      accentColor,
-      typeIcons,
-    };
-  });
+  return collections.map((col) => buildDashboardCollection(col));
 }
 
 export interface CollectionDetail {

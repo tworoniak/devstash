@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Star, MoreHorizontal, Code, Pencil, Trash2 } from 'lucide-react';
 import { ICON_MAP } from '@/lib/constants/icon-map';
+import { timeAgo } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,14 +32,17 @@ interface CollectionCardProps {
     description: string | null;
     isFavorite: boolean;
     itemCount: number;
+    updatedAt: Date;
     accentColor: string;
     typeIcons: { icon: string; color: string }[];
+    typeBars: { color: string; percentage: number }[];
+    recentItems: { id: string; title: string; icon: string; color: string }[];
   };
 }
 
 export function CollectionCard({ collection }: CollectionCardProps) {
   const router = useRouter();
-  const { accentColor, typeIcons } = collection;
+  const { accentColor, typeBars, recentItems } = collection;
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -55,12 +59,10 @@ export function CollectionCard({ collection }: CollectionCardProps) {
     setDeleting(true);
     const result = await deleteCollection(collection.id);
     setDeleting(false);
-
     if (!result.success) {
       toast.error(result.error);
       return;
     }
-
     toast.success('Collection deleted');
     router.refresh();
   }
@@ -72,14 +74,17 @@ export function CollectionCard({ collection }: CollectionCardProps) {
         tabIndex={0}
         onClick={handleCardClick}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleCardClick(); }}
-        className="group relative bg-card border border-border rounded-lg p-4 h-full flex flex-col gap-2 hover:border-border/80 hover:bg-card/80 transition-colors cursor-pointer"
+        className="group relative bg-card border border-border rounded-lg p-4 flex flex-col gap-3 hover:border-border/80 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 cursor-pointer"
         style={{ borderLeftColor: accentColor, borderLeftWidth: '3px' }}
       >
         {/* Header */}
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <h3 className="font-medium text-sm text-foreground truncate">{collection.name}</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">{collection.itemCount} items</p>
+            <h3 className="font-semibold text-sm text-foreground truncate">{collection.name}</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {collection.itemCount} {collection.itemCount === 1 ? 'item' : 'items'}
+              {' · '}updated {timeAgo(collection.updatedAt)}
+            </p>
           </div>
           <div className="flex items-center gap-1 shrink-0" onClick={stopProp}>
             {collection.isFavorite && (
@@ -110,19 +115,30 @@ export function CollectionCard({ collection }: CollectionCardProps) {
           </div>
         </div>
 
-        {/* Description */}
-        {collection.description && (
-          <p className="text-xs text-muted-foreground line-clamp-2 flex-1">
-            {collection.description}
-          </p>
+        {/* Type color bar */}
+        {typeBars.length > 0 && (
+          <div className="flex h-1 rounded-full overflow-hidden gap-px">
+            {typeBars.map(({ color, percentage }, i) => (
+              <div
+                key={i}
+                className="h-full rounded-full"
+                style={{ width: `${percentage}%`, backgroundColor: color }}
+              />
+            ))}
+          </div>
         )}
 
-        {/* Type icon strip */}
-        {typeIcons.length > 0 && (
-          <div className="flex items-center gap-1.5 mt-1">
-            {typeIcons.map(({ icon, color }) => {
-              const Icon = ICON_MAP[icon] ?? Code;
-              return <Icon key={icon} className="h-3.5 w-3.5" style={{ color }} />;
+        {/* Recent items */}
+        {recentItems.length > 0 && (
+          <div className="flex flex-col gap-1.5">
+            {recentItems.map((item) => {
+              const Icon = ICON_MAP[item.icon] ?? Code;
+              return (
+                <div key={item.id} className="flex items-center gap-2 min-w-0">
+                  <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: item.color }} />
+                  <span className="text-xs text-muted-foreground truncate">{item.title}</span>
+                </div>
+              );
             })}
           </div>
         )}

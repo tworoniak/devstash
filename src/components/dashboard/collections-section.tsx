@@ -3,6 +3,7 @@ import { ChevronRight, Layers } from 'lucide-react';
 import { auth } from '@/auth';
 import { getDashboardCollections } from '@/lib/db/collections';
 import { CollectionCard } from './collection-card';
+import { NewCollectionButton } from '@/components/collections/new-collection-button';
 
 export async function CollectionsSection() {
   let collections: Awaited<ReturnType<typeof getDashboardCollections>> = [];
@@ -38,13 +39,16 @@ export async function CollectionsSection() {
           </p>
         </div>
 
-        <Link
-          href='/collections'
-          className='flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors'
-        >
-          View all
-          <ChevronRight className='h-3 w-3' />
-        </Link>
+        <div className='flex items-center gap-3'>
+          <NewCollectionButton />
+          <Link
+            href='/collections'
+            className='flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors'
+          >
+            View all
+            <ChevronRight className='h-3 w-3' />
+          </Link>
+        </div>
       </div>
       {collections.length === 0 ? (
         <p className='text-sm text-muted-foreground'>No collections yet.</p>

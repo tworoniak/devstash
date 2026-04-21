@@ -32,7 +32,7 @@ export async function StatsSection() {
         return (
           <div
             key={stat.label}
-            className="bg-card border border-border rounded-lg p-4 flex items-center gap-3"
+            className="bg-card border border-border rounded-lg p-4 flex items-center gap-3 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300"
           >
             <div
               className="h-8 w-8 rounded-md flex items-center justify-center shrink-0"

@@ -45,7 +45,7 @@ export default async function FavoritesPage() {
                 </span>
                 <span className='text-xs font-mono text-muted-foreground/50'>{items.length}</span>
               </div>
-              <div className='border border-border rounded-md overflow-hidden divide-y divide-border/50'>
+              <div className='flex flex-col gap-1'>
                 {items.map((item) => (
                   <FavoriteItemRow key={item.id} item={item} />
                 ))}

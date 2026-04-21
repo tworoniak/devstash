@@ -5,7 +5,7 @@ import { getSidebarFavoriteCollections, getSidebarRecentCollections } from '@/li
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import type { SidebarData } from '@/components/layout/sidebar';
 
-export default async function FavoritesLayout({
+export default async function PinnedLayout({
   children,
 }: {
   children: React.ReactNode;

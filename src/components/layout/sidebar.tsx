@@ -9,9 +9,15 @@ import {
   ChevronRight,
   LogOut,
   User,
+  LayoutDashboard,
+  Pin,
+  Clock,
+  Sun,
+  Moon,
 } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { ICON_MAP } from '@/lib/constants/icon-map';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
@@ -29,6 +35,8 @@ export interface SidebarData {
   itemTypes: SidebarItemType[];
   favoriteCollections: SidebarCollection[];
   recentCollections: SidebarCollection[];
+  pinnedCount: number;
+  favoritesCount: number;
 }
 
 export interface SidebarUser {
@@ -72,16 +80,91 @@ export function SidebarContent({
   sidebarData,
   user,
 }: SidebarContentProps) {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const isDark = mounted ? theme === 'dark' : true;
+
   const [typesOpen, setTypesOpen] = useState(true);
   const [collectionsOpen, setCollectionsOpen] = useState(true);
 
   const itemTypes = sidebarData?.itemTypes ?? [];
   const favoriteCollections = sidebarData?.favoriteCollections ?? [];
   const recentCollections = sidebarData?.recentCollections ?? [];
+  const pinnedCount = sidebarData?.pinnedCount ?? 0;
+  const favoritesCount = sidebarData?.favoritesCount ?? 0;
 
   return (
     <div className='flex flex-col h-full'>
+      {/* Logo */}
+      <div
+        className={`shrink-0 flex items-center border-b border-border h-14 ${collapsed ? 'justify-center px-2' : 'px-4'}`}
+      >
+        <Link
+          href='/dashboard'
+          className='flex items-center gap-2.5 hover:opacity-80 transition-opacity'
+        >
+          <div className='w-7 h-7 rounded-md bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0'>
+            DS
+          </div>
+          {!collapsed && (
+            <span className='font-semibold text-sm'>DevStash</span>
+          )}
+        </Link>
+      </div>
+
       <div className='flex-1 overflow-y-auto overflow-x-hidden py-3 space-y-1'>
+        {/* Main nav */}
+        <nav className={`space-y-0.5 mb-2 pb-3 border-b border-border ${collapsed ? 'px-1' : 'px-1.5'}`}>
+          <Link
+            href='/dashboard'
+            title={collapsed ? 'Dashboard' : undefined}
+            className={`flex items-center gap-2.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors ${collapsed ? 'justify-center px-2 py-2' : 'px-2 py-1.5'}`}
+          >
+            <LayoutDashboard className='h-4 w-4 shrink-0' />
+            {!collapsed && <span>Dashboard</span>}
+          </Link>
+          <Link
+            href='/pinned'
+            title={collapsed ? 'Pinned' : undefined}
+            className={`flex items-center gap-2.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors ${collapsed ? 'justify-center px-2 py-2' : 'px-2 py-1.5'}`}
+          >
+            <Pin className='h-4 w-4 shrink-0' />
+            {!collapsed && (
+              <>
+                <span>Pinned</span>
+                <span className='flex-1' />
+                {pinnedCount > 0 && (
+                  <span className='text-xs text-muted-foreground/60'>{pinnedCount}</span>
+                )}
+              </>
+            )}
+          </Link>
+          <Link
+            href='/favorites'
+            title={collapsed ? 'Favorites' : undefined}
+            className={`flex items-center gap-2.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors ${collapsed ? 'justify-center px-2 py-2' : 'px-2 py-1.5'}`}
+          >
+            <Star className='h-4 w-4 shrink-0' />
+            {!collapsed && (
+              <>
+                <span>Favorites</span>
+                <span className='flex-1' />
+                {favoritesCount > 0 && (
+                  <span className='text-xs text-muted-foreground/60'>{favoritesCount}</span>
+                )}
+              </>
+            )}
+          </Link>
+          <span
+            title={collapsed ? 'Recent' : undefined}
+            className={`flex items-center gap-2.5 rounded-md text-sm text-muted-foreground/40 cursor-not-allowed select-none ${collapsed ? 'justify-center px-2 py-2' : 'px-2 py-1.5'}`}
+          >
+            <Clock className='h-4 w-4 shrink-0' />
+            {!collapsed && <span>Recent</span>}
+          </span>
+        </nav>
+
         {/* Types section */}
         {!collapsed && (
           <SectionHeader
@@ -144,11 +227,8 @@ export function SidebarContent({
             />
             {collectionsOpen && (
               <div className='space-y-3 mb-2'>
-                {/* Favorites */}
+                {/* Favorite collections */}
                 <div>
-                  <p className='px-3 pt-1 pb-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60'>
-                    Favorites
-                  </p>
                   <nav className='px-1.5 space-y-0.5'>
                     {favoriteCollections.map((col) => (
                       <Link
@@ -161,13 +241,6 @@ export function SidebarContent({
                         <Star className='h-3 w-3 shrink-0 fill-amber-400 text-amber-400' />
                       </Link>
                     ))}
-                    <Link
-                      href='/favorites'
-                      className='flex items-center gap-1.5 px-2 py-1.5 rounded-md text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors'
-                    >
-                      <ChevronRight className='h-3 w-3' />
-                      View all favorites
-                    </Link>
                   </nav>
                 </div>
 
@@ -250,6 +323,14 @@ export function SidebarContent({
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
+              className='flex items-center gap-2 cursor-pointer'
+              onClick={() => setTheme(isDark ? 'light' : 'dark')}
+            >
+              {isDark ? <Sun className='h-4 w-4' /> : <Moon className='h-4 w-4' />}
+              {isDark ? 'Light' : 'Dark'} mode
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
               className='flex items-center gap-2 text-destructive focus:text-destructive cursor-pointer'
               onClick={() => signOut({ callbackUrl: '/sign-in' })}
             >
@@ -274,7 +355,7 @@ export function Sidebar({
 }) {
   return (
     <aside
-      className={`hidden lg:flex flex-col shrink-0 border-r border-border bg-card transition-all duration-200 ${
+      className={`hidden lg:flex flex-col shrink-0 border-r border-border bg-sidebar-bg transition-all duration-200 ${
         open ? 'w-56' : 'w-14'
       }`}
     >
