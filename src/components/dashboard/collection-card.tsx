@@ -22,7 +22,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { EditCollectionDialog } from '@/components/collections/edit-collection-dialog';
-import { deleteCollection } from '@/actions/collections';
+import { deleteCollection, toggleCollectionFavorite } from '@/actions/collections';
 import { toast } from 'sonner';
 
 interface CollectionCardProps {
@@ -46,6 +46,19 @@ export function CollectionCard({ collection }: CollectionCardProps) {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(collection.isFavorite);
+
+  async function handleFavorite() {
+    setIsFavorite((prev) => !prev);
+    const result = await toggleCollectionFavorite(collection.id);
+    if (!result.success) {
+      setIsFavorite((prev) => !prev);
+      toast.error(result.error);
+      return;
+    }
+    toast.success(result.data.isFavorite ? 'Added to favorites' : 'Removed from favorites');
+    router.refresh();
+  }
 
   function handleCardClick() {
     router.push(`/collections/${collection.id}`);
@@ -87,7 +100,7 @@ export function CollectionCard({ collection }: CollectionCardProps) {
             </p>
           </div>
           <div className="flex items-center gap-1 shrink-0" onClick={stopProp}>
-            {collection.isFavorite && (
+            {isFavorite && (
               <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
             )}
             <DropdownMenu>
@@ -106,9 +119,9 @@ export function CollectionCard({ collection }: CollectionCardProps) {
                   <Trash2 className="h-3.5 w-3.5 mr-2" />
                   Delete
                 </DropdownMenuItem>
-                <DropdownMenuItem disabled>
-                  <Star className="h-3.5 w-3.5 mr-2" />
-                  Favorite
+                <DropdownMenuItem onClick={handleFavorite}>
+                  <Star className={`h-3.5 w-3.5 mr-2 ${isFavorite ? 'fill-amber-400 text-amber-400' : ''}`} />
+                  {isFavorite ? 'Unfavorite' : 'Favorite'}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

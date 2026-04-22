@@ -15,7 +15,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { EditCollectionDialog } from '@/components/collections/edit-collection-dialog';
-import { deleteCollection } from '@/actions/collections';
+import { deleteCollection, toggleCollectionFavorite } from '@/actions/collections';
 import { toast } from 'sonner';
 
 interface CollectionHeaderProps {
@@ -33,6 +33,19 @@ export function CollectionHeader({ collection, itemCount }: CollectionHeaderProp
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(collection.isFavorite);
+
+  async function handleFavorite() {
+    setIsFavorite((prev) => !prev);
+    const result = await toggleCollectionFavorite(collection.id);
+    if (!result.success) {
+      setIsFavorite((prev) => !prev);
+      toast.error(result.error);
+      return;
+    }
+    toast.success(result.data.isFavorite ? 'Added to favorites' : 'Removed from favorites');
+    router.refresh();
+  }
 
   async function handleDelete() {
     setDeleting(true);
@@ -54,7 +67,7 @@ export function CollectionHeader({ collection, itemCount }: CollectionHeaderProp
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-semibold tracking-tight">{collection.name}</h1>
-            {collection.isFavorite && (
+            {isFavorite && (
               <Star className="h-4 w-4 fill-amber-400 text-amber-400 shrink-0" />
             )}
           </div>
@@ -71,10 +84,10 @@ export function CollectionHeader({ collection, itemCount }: CollectionHeaderProp
             variant="ghost"
             size="icon"
             className="h-8 w-8 text-muted-foreground hover:text-foreground"
-            disabled
-            title="Favorite (coming soon)"
+            onClick={handleFavorite}
+            title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
           >
-            <Star className={`h-4 w-4 ${collection.isFavorite ? 'fill-amber-400 text-amber-400' : ''}`} />
+            <Star className={`h-4 w-4 ${isFavorite ? 'fill-amber-400 text-amber-400' : ''}`} />
           </Button>
           <Button
             variant="ghost"

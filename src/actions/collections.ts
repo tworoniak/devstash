@@ -7,6 +7,7 @@ import {
   getUserCollections as getUserCollectionsQuery,
   updateCollection as updateCollectionQuery,
   deleteCollection as deleteCollectionQuery,
+  toggleCollectionFavorite as toggleCollectionFavoriteQuery,
 } from '@/lib/db/collections';
 import type { CreatedCollection, UserCollection } from '@/lib/db/collections';
 
@@ -87,6 +88,23 @@ export async function updateCollection(
     return { success: true, data: updated };
   } catch {
     return { success: false, error: 'Failed to update collection' };
+  }
+}
+
+export async function toggleCollectionFavorite(
+  id: string
+): Promise<ActionResult<{ isFavorite: boolean }>> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    const result = await toggleCollectionFavoriteQuery(id, session.user.id);
+    if (!result) return { success: false, error: 'Collection not found' };
+    return { success: true, data: result };
+  } catch {
+    return { success: false, error: 'Failed to update favorite' };
   }
 }
 
