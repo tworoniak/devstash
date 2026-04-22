@@ -1,28 +1,16 @@
-# Current Feature: Favorites Page Sorting
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add client-side sort controls to the favorites page (`/favorites`)
-- Sort options: Name (A→Z / Z→A), Date (newest/oldest), Item Type (A→Z)
-- Sorting applies independently to the Items section and Collections section
-- Sort state is local (no URL params, no server round-trip)
-
 ## Notes
-
-- Favorites page is at `src/app/(dashboard)/favorites/page.tsx` (or similar)
-- Items and Collections are rendered in separate sections — each can share the same sort UI pattern
-- Sort should be client-side only (data is already fetched server-side)
-- Use a sort dropdown or segmented control — match existing dashboard UI patterns (shadcn Select or DropdownMenu)
-- Date sort key: `updatedAt` (already used for ordering in the server query)
-- Item Type sort key: `itemType.name`
-- Name sort key: `title` for items, `name` for collections
 
 ## History
 
+- **Favorites Page Sorting** - `FavoritesSortableList` client component added at `src/components/favorites/favorites-sortable-list.tsx`; Items section supports Date: Recent, Date: Oldest, Name: A→Z, Name: Z→A, Type: A→Z; Collections section supports Date: Recent, Date: Oldest, Name: A→Z, Name: Z→A; sort state is local (`useState`), sorted via `useMemo`; shadcn `Select` dropdown per section in the section header; `page.tsx` simplified to pass items/collections to the new component (Completed)
 - **Security Review Fixes** - 5 IDOR ownership bypasses fixed by adding `userId` to Prisma `where` clauses in `updateItem`, `deleteItem`, `toggleItemFavorite`, `toggleItemPin`, `updateCollection`, `deleteCollection`, `toggleCollectionFavorite`; `sanitizeFilename` helper added to `src/lib/utils.ts` and applied to `Content-Disposition` headers in download/export routes and on upload ingest; rate limiter changed to fail closed on Redis error; `deleteAccount` limiter added and wired to `DELETE /api/user`; shared Zod schemas extracted to `src/lib/schemas/auth.ts` and applied to all 5 auth routes (register, forgot-password, reset-password, resend-verification, user/password) replacing manual field checks; import N+1 collection lookup replaced with `findMany` + Map; `itemCollection` loop inserts replaced with `createMany`; duplicate detection normalized to case-insensitive; `$transaction` wrapped in try/catch; `getAuthUserId` helper extracted to `src/actions/auth-helpers.ts` and standardized across items and collections actions (Completed)
 - **Collection Favorite Toggle** - `toggleCollectionFavorite` db query added to src/lib/db/collections.ts with ownership check; `toggleCollectionFavorite` server action added to src/actions/collections.ts with auth guard; CollectionHeader star button wired with optimistic local state (flips instantly, reverts on error), toast on success/error, router.refresh(); CollectionCard dropdown Favorite item enabled and wired with same optimistic pattern, label toggles between "Favorite"/"Unfavorite" (Completed)
 - **Import / Export** - New "Data" section on /settings page with Export JSON button (downloads `devstash-export-{date}.json` via GET /api/export), Export ZIP button (PRO, disabled, bundles R2 files via fflate), and Import from JSON button; ImportDialog component with drag-and-drop file drop zone, client-side FileReader, previewImport server action shows item counts by type + collection/tag counts, skipDuplicates toggle (default on, matches title+type+content/URL), importData server action validates via Zod ExportSchema, creates collections→items→tags in a Prisma transaction, enforces free tier limits (50 items / 3 collections), skips file/image items for free users; ExportSchema extracted to src/lib/import-schema.ts for shared use in tests; 13 unit tests across import.test.ts and export.test.ts (Completed)
