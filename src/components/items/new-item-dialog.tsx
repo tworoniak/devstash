@@ -40,7 +40,7 @@ const ITEM_TYPES = [
   { value: 'image', label: 'Image' },
 ] as const;
 
-type ItemTypeName = (typeof ITEM_TYPES)[number]['value'];
+export type ItemTypeName = (typeof ITEM_TYPES)[number]['value'];
 
 const CONTENT_TYPES = new Set<ItemTypeName>(['snippet', 'prompt', 'command', 'note']);
 const LANGUAGE_TYPES = new Set<ItemTypeName>(['snippet', 'command']);
@@ -98,21 +98,25 @@ function defaultForm(): FormState {
 interface NewItemDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  defaultType?: ItemTypeName;
 }
 
-export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
+export function NewItemDialog({ open, onOpenChange, defaultType }: NewItemDialogProps) {
   const router = useRouter();
-  const [form, setForm] = useState<FormState>(defaultForm);
+  const [form, setForm] = useState<FormState>(() =>
+    defaultType ? { ...defaultForm(), typeName: defaultType } : defaultForm()
+  );
   const [saving, setSaving] = useState(false);
   const [collections, setCollections] = useState<UserCollection[]>([]);
   const [selectedCollectionIds, setSelectedCollectionIds] = useState<string[]>([]);
 
   useEffect(() => {
     if (!open) return;
+    if (defaultType) setForm((prev) => ({ ...prev, typeName: defaultType }));
     getUserCollections().then((result) => {
       if (result.success) setCollections(result.data);
     });
-  }, [open]);
+  }, [open, defaultType]);
 
   function setField<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -125,7 +129,7 @@ export function NewItemDialog({ open, onOpenChange }: NewItemDialogProps) {
 
   function handleClose() {
     onOpenChange(false);
-    setForm(defaultForm());
+    setForm(defaultType ? { ...defaultForm(), typeName: defaultType } : defaultForm());
     setSelectedCollectionIds([]);
   }
 

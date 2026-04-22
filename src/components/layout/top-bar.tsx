@@ -90,7 +90,7 @@ export function TopBar({
 
         {/* Actions */}
         <div className='flex items-center gap-2 ml-auto shrink-0 relative'>
-          <Button size='sm' className='gap-1.5 text-sm' onClick={onNewItem}>
+          <Button size='sm' className='gap-1.5 text-sm bg-linear-to-r from-blue-500 to-violet-500 text-white hover:from-violet-500 hover:to-blue-500 transition-all border-0' onClick={onNewItem}>
             <Plus className='h-4 w-4' />
             <span className='hidden sm:inline'>New Item</span>
           </Button>

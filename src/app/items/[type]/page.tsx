@@ -7,6 +7,8 @@ import { ItemRow } from '@/components/dashboard/item-row';
 import { ImageThumbnailCard } from '@/components/items/image-thumbnail-card';
 import { FileListRow } from '@/components/items/file-list-row';
 import { Pagination } from '@/components/shared/pagination';
+import { NewTypeItemButton } from '@/components/items/new-type-item-button';
+import type { ItemTypeName } from '@/components/items/new-item-dialog';
 
 // Valid plural slugs → singular type names stored in DB
 const SLUG_TO_TYPE: Record<string, string> = {
@@ -46,11 +48,14 @@ export default async function ItemsTypePage({ params, searchParams }: PageProps)
 
   return (
     <div className='space-y-6'>
-      <div>
-        <h1 className='text-2xl font-semibold tracking-tight'>{displayName}</h1>
-        <p className='text-sm text-muted-foreground mt-1'>
-          {total} {total === 1 ? typeName : slug}
-        </p>
+      <div className='flex items-start justify-between'>
+        <div>
+          <h1 className='text-2xl font-semibold tracking-tight'>{displayName}</h1>
+          <p className='text-sm text-muted-foreground mt-1'>
+            {total} {total === 1 ? typeName : slug}
+          </p>
+        </div>
+        <NewTypeItemButton typeName={typeName as ItemTypeName} label={typeName.charAt(0).toUpperCase() + typeName.slice(1)} />
       </div>
 
       {items.length === 0 ? (
