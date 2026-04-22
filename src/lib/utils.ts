@@ -9,6 +9,10 @@ export function formatDate(date: Date) {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
+export function sanitizeFilename(raw: string): string {
+  return raw.replace(/[^\w\s\-\.]/g, '_').slice(0, 255);
+}
+
 export function timeAgo(date: Date): string {
   const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
   if (seconds < 60) return 'just now';

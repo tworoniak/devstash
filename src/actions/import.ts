@@ -131,7 +131,7 @@ export async function importData(
   function isDuplicate(item: (typeof items)[0]): boolean {
     return existingItems.some(
       (existing) =>
-        existing.title === item.title &&
+        existing.title.trim().toLowerCase() === item.title.trim().toLowerCase() &&
         existing.itemType.name === item.type &&
         existing.content === (item.content ?? null) &&
         existing.url === (item.url ?? null)
@@ -143,23 +143,26 @@ export async function importData(
   let itemsImported = 0;
   let collectionsImported = 0;
 
-  await prisma.$transaction(async (tx) => {
-    // 1. Upsert collections by name
-    const collectionMap = new Map<string, string>();
+  try {
+    await prisma.$transaction(async (tx) => {
+      // 1. Upsert collections by name — single query then Map lookup (no N+1)
+      const collectionMap = new Map<string, string>();
 
-    const allCollectionNames = new Set<string>([
-      ...exportCollections.map((c) => c.name),
-      ...itemsToImport.flatMap((item) => item.collections),
-    ]);
+      const allCollectionNames = new Set<string>([
+        ...exportCollections.map((c) => c.name),
+        ...itemsToImport.flatMap((item) => item.collections),
+      ]);
 
-    for (const name of allCollectionNames) {
-      const existing = await tx.collection.findFirst({
-        where: { userId, name },
-        select: { id: true },
+      const existingCollections = await tx.collection.findMany({
+        where: { userId, name: { in: Array.from(allCollectionNames) } },
+        select: { id: true, name: true },
       });
-      if (existing) {
-        collectionMap.set(name, existing.id);
-      } else {
+      for (const col of existingCollections) {
+        collectionMap.set(col.name, col.id);
+      }
+
+      for (const name of allCollectionNames) {
+        if (collectionMap.has(name)) continue;
         const exportedCol = exportCollections.find((c) => c.name === name);
         const created = await tx.collection.create({
           data: {
@@ -171,56 +174,58 @@ export async function importData(
           select: { id: true },
         });
         collectionMap.set(name, created.id);
-        // Only count collections that were in the original export
         if (exportedCol) collectionsImported++;
       }
-    }
 
-    // 2. Create items with tags and collection assignments
-    for (const item of itemsToImport) {
-      const typeId = typeMap.get(item.type);
-      if (!typeId) continue;
+      // 2. Create items with tags and batched collection assignments
+      for (const item of itemsToImport) {
+        const typeId = typeMap.get(item.type);
+        if (!typeId) continue;
 
-      let contentType: 'TEXT' | 'FILE' | 'URL' = 'TEXT';
-      if (URL_TYPES.has(item.type)) contentType = 'URL';
-      else if (FILE_TYPES.has(item.type)) contentType = 'FILE';
+        let contentType: 'TEXT' | 'FILE' | 'URL' = 'TEXT';
+        if (URL_TYPES.has(item.type)) contentType = 'URL';
+        else if (FILE_TYPES.has(item.type)) contentType = 'FILE';
 
-      const created = await tx.item.create({
-        data: {
-          title: item.title,
-          contentType,
-          content: item.content ?? null,
-          language: item.language ?? null,
-          description: item.description ?? null,
-          url: item.url ?? null,
-          fileName: item.fileName ?? null,
-          fileSize: item.fileSize ?? null,
-          isFavorite: item.isFavorite,
-          isPinned: item.isPinned,
-          userId,
-          itemTypeId: typeId,
-          tags: {
-            connectOrCreate: item.tags.map((tag) => ({
-              where: { name: tag },
-              create: { name: tag },
-            })),
+        const created = await tx.item.create({
+          data: {
+            title: item.title,
+            contentType,
+            content: item.content ?? null,
+            language: item.language ?? null,
+            description: item.description ?? null,
+            url: item.url ?? null,
+            fileName: item.fileName ?? null,
+            fileSize: item.fileSize ?? null,
+            isFavorite: item.isFavorite,
+            isPinned: item.isPinned,
+            userId,
+            itemTypeId: typeId,
+            tags: {
+              connectOrCreate: item.tags.map((tag) => ({
+                where: { name: tag },
+                create: { name: tag },
+              })),
+            },
           },
-        },
-        select: { id: true },
-      });
+          select: { id: true },
+        });
 
-      for (const colName of item.collections) {
-        const colId = collectionMap.get(colName);
-        if (colId) {
-          await tx.itemCollection.create({
-            data: { itemId: created.id, collectionId: colId },
-          });
+        const itemCollections = item.collections
+          .map((colName) => collectionMap.get(colName))
+          .filter((colId): colId is string => colId !== undefined)
+          .map((collectionId) => ({ itemId: created.id, collectionId }));
+
+        if (itemCollections.length) {
+          await tx.itemCollection.createMany({ data: itemCollections });
         }
-      }
 
-      itemsImported++;
-    }
-  });
+        itemsImported++;
+      }
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Import failed';
+    return { success: false, error: `Import transaction failed: ${message}` };
+  }
 
   return { success: true, data: { itemsImported, collectionsImported } };
 }

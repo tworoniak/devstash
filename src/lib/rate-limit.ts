@@ -38,6 +38,12 @@ const limiters = {
     limiter: Ratelimit.slidingWindow(3, '15 m'),
     prefix: 'rl:resend-verification',
   }),
+  // 5 attempts per hour — account deletion
+  deleteAccount: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(5, '1 h'),
+    prefix: 'rl:delete-account',
+  }),
 } as const;
 
 export type LimiterKey = keyof typeof limiters;
@@ -50,7 +56,7 @@ export interface RateLimitResult {
 
 /**
  * Check rate limit for the given key and identifier.
- * Fails open — if Redis is unavailable, allows the request through.
+ * Fails closed — if Redis is unavailable, blocks the request to prevent auth bypass.
  */
 export async function checkRateLimit(
   limiterKey: LimiterKey,
@@ -63,9 +69,10 @@ export async function checkRateLimit(
       remaining: result.remaining,
       reset: result.reset,
     };
-  } catch {
-    // Fail open: don't block users if Redis is down
-    return { success: true, remaining: 0, reset: 0 };
+  } catch (err) {
+    // Fail closed: block requests if Redis is unavailable to prevent auth bypass
+    console.error('[rate-limit] Redis error:', err);
+    return { success: false, remaining: 0, reset: Date.now() + 60_000 };
   }
 }
 

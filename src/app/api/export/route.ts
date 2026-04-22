@@ -3,6 +3,7 @@ import { auth } from '@/auth';
 import { getUserExportData } from '@/lib/db/export';
 import { r2Get } from '@/lib/r2-api';
 import { zipSync } from 'fflate';
+import { sanitizeFilename } from '@/lib/utils';
 
 export async function GET(request: NextRequest) {
   const session = await auth();
@@ -25,7 +26,7 @@ export async function GET(request: NextRequest) {
       fileItems.map(async (item) => {
         try {
           const { body } = await r2Get(item.fileUrl!);
-          files[`files/${item.fileName}`] = new Uint8Array(body);
+          files[`files/${sanitizeFilename(item.fileName!)}`] = new Uint8Array(body);
         } catch {
           // Skip files that can't be fetched from storage
         }

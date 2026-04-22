@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { prisma } from '@/lib/prisma';
 import { sendPasswordResetEmail } from '@/lib/email';
 import { checkRateLimit, getClientIp, retryAfterSeconds } from '@/lib/rate-limit';
+import { ForgotPasswordSchema } from '@/lib/schemas/auth';
 
 const IDENTIFIER_PREFIX = 'password-reset:';
 
@@ -17,11 +18,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const { email } = await request.json();
-
-    if (!email) {
-      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+    const parsed = ForgotPasswordSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      const message = parsed.error.issues[0]?.message ?? 'Invalid input';
+      return NextResponse.json({ error: message }, { status: 400 });
     }
+    const { email } = parsed.data;
 
     const user = await prisma.user.findUnique({ where: { email } });
 

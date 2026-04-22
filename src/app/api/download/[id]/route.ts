@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { r2Get } from '@/lib/r2-api';
 import { getItemById } from '@/lib/db/items';
+import { sanitizeFilename } from '@/lib/utils';
 
 export async function GET(
   _request: NextRequest,
@@ -27,7 +28,7 @@ export async function GET(
     return NextResponse.json({ error: 'File not found in storage' }, { status: 404 });
   }
 
-  const filename = item.fileName ?? 'download';
+  const filename = sanitizeFilename(item.fileName ?? 'download');
 
   return new NextResponse(new Uint8Array(body), {
     headers: {

@@ -245,7 +245,7 @@ export async function updateCollection(
   if (!existing) return null;
 
   return prisma.collection.update({
-    where: { id },
+    where: { id, userId },
     data: {
       name: data.name,
       description: data.description ?? null,
@@ -265,7 +265,7 @@ export async function toggleCollectionFavorite(
   if (!existing) return null;
 
   const updated = await prisma.collection.update({
-    where: { id },
+    where: { id, userId },
     data: { isFavorite: !existing.isFavorite },
     select: { isFavorite: true },
   });
@@ -276,7 +276,7 @@ export async function deleteCollection(id: string, userId: string): Promise<bool
   const existing = await prisma.collection.findFirst({ where: { id, userId }, select: { id: true } });
   if (!existing) return false;
 
-  await prisma.collection.delete({ where: { id } });
+  await prisma.collection.delete({ where: { id, userId } });
   return true;
 }
 

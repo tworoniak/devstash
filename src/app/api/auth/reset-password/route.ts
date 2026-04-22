@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { checkRateLimit, getClientIp, retryAfterSeconds } from '@/lib/rate-limit';
+import { ResetPasswordSchema } from '@/lib/schemas/auth';
 
 const IDENTIFIER_PREFIX = 'password-reset:';
 
@@ -16,22 +17,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const { token, password, confirmPassword } = await request.json();
-
-    if (!token || !password || !confirmPassword) {
-      return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
+    const parsed = ResetPasswordSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      const message = parsed.error.issues[0]?.message ?? 'Invalid input';
+      return NextResponse.json({ error: message }, { status: 400 });
     }
-
-    if (password !== confirmPassword) {
-      return NextResponse.json({ error: 'Passwords do not match' }, { status: 400 });
-    }
-
-    if (password.length < 8) {
-      return NextResponse.json(
-        { error: 'Password must be at least 8 characters' },
-        { status: 400 }
-      );
-    }
+    const { token, password } = parsed.data;
 
     const record = await prisma.verificationToken.findUnique({ where: { token } });
 
