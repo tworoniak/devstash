@@ -1,12 +1,25 @@
-# Current Feature
+# Current Feature: Favorites Page Sorting
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Add client-side sort controls to the favorites page (`/favorites`)
+- Sort options: Name (A→Z / Z→A), Date (newest/oldest), Item Type (A→Z)
+- Sorting applies independently to the Items section and Collections section
+- Sort state is local (no URL params, no server round-trip)
+
 ## Notes
+
+- Favorites page is at `src/app/(dashboard)/favorites/page.tsx` (or similar)
+- Items and Collections are rendered in separate sections — each can share the same sort UI pattern
+- Sort should be client-side only (data is already fetched server-side)
+- Use a sort dropdown or segmented control — match existing dashboard UI patterns (shadcn Select or DropdownMenu)
+- Date sort key: `updatedAt` (already used for ordering in the server query)
+- Item Type sort key: `itemType.name`
+- Name sort key: `title` for items, `name` for collections
 
 ## History
 
