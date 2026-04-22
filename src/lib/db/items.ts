@@ -171,7 +171,7 @@ export async function updateItem(
   }
 
   return prisma.item.update({
-    where: { id },
+    where: { id, userId },
     data: {
       title: data.title,
       description: data.description,
@@ -206,7 +206,7 @@ export async function deleteItem(
   });
   if (!existing) return { deleted: false, fileKey: null };
 
-  await prisma.item.delete({ where: { id } });
+  await prisma.item.delete({ where: { id, userId } });
   return { deleted: true, fileKey: existing.fileUrl };
 }
 
@@ -284,7 +284,7 @@ export async function toggleItemFavorite(
   if (!existing) return null;
 
   const updated = await prisma.item.update({
-    where: { id },
+    where: { id, userId },
     data: { isFavorite: !existing.isFavorite },
     select: { isFavorite: true },
   });
@@ -302,7 +302,7 @@ export async function toggleItemPin(
   if (!existing) return null;
 
   const updated = await prisma.item.update({
-    where: { id },
+    where: { id, userId },
     data: { isPinned: !existing.isPinned },
     select: { isPinned: true },
   });

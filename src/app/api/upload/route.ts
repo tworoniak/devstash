@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { r2Put } from '@/lib/r2-api';
+import { sanitizeFilename } from '@/lib/utils';
 
 // Allowed extensions per type — source of truth for validation.
 // MIME type check is unreliable: macOS reports .md as text/plain or text/x-markdown,
@@ -85,7 +86,7 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({
     key,
     url: `${process.env.R2_PUBLIC_URL}/${key}`,
-    fileName: file.name,
+    fileName: sanitizeFilename(file.name),
     fileSize: file.size,
     mimeType: contentType,
   });

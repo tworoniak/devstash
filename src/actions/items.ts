@@ -1,7 +1,6 @@
 'use server';
 
 import { z } from 'zod';
-import { auth } from '@/auth';
 import { r2Delete } from '@/lib/r2-api';
 import {
   updateItem as updateItemQuery,
@@ -11,11 +10,7 @@ import {
   toggleItemFavorite as toggleItemFavoriteQuery,
 } from '@/lib/db/items';
 import type { ItemDetail, DashboardItem } from '@/lib/db/items';
-
-async function getAuthUserId(): Promise<string | null> {
-  const session = await auth();
-  return session?.user?.id ?? null;
-}
+import { getAuthUserId } from '@/actions/auth-helpers';
 
 const UpdateItemSchema = z.object({
   title: z.string().trim().min(1, 'Title is required'),
