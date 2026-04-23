@@ -60,7 +60,7 @@ If making a tech or architecture decision: check `decisions.md` first.
 
 1. Read MEMORY.md (the index)
 2. Read active-work.md (coordination)
-3. Read `projects/neurostack.md`
+3. Read `projects/devstash.md`
 4. Check gotchas.md if relevant
 
 ### During work
